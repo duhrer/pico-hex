@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(NAME blinky) # *** Replace this with your project's name. ***
+set(NAME pico-hex)
 
 set(PICO_PLATFORM rp2350)
 set(PICO_BOARD pico2_w)
@@ -30,8 +30,12 @@ add_compile_options(-Wall)
 pico_sdk_init()
 
 set(SOURCE_FILES
-    src/blinky.cpp # *** Replace this with your source files. ***
+    src/pico-hex.cpp
+    src/animation.cpp
+    src/hex-unit.cpp   
 )
+
+add_subdirectory(lib/pico_neopixels build)
 
 add_executable(${NAME}
     ${SOURCE_FILES}
@@ -40,9 +44,15 @@ add_executable(${NAME}
 # Pedantic warnings on for project source code only.
 set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_OPTIONS "-Wextra;-Wpedantic")
 
+# Include our own header files.
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 target_link_libraries(${NAME}
     pico_stdlib
+    pico_neopixel
+    hardware_pio
     pico_cyw43_arch_none
+    pico_bootsel_via_double_reset
 )
 
 target_compile_definitions(${NAME} PRIVATE)

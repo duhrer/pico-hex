@@ -7,16 +7,19 @@ class Animation {
    public:
       bool isFinished = false;
 
-      HexUnit hexUnit;
+      // HexUnit hexUnit;
 
       int msDelayBetweenFrames = 40; // 25 FPS (not counting drawing time)
       int frameNumber = 0;
 
-      Animation(HexUnit hexUnit);
+      // Animation(HexUnit hexUnit);
+      Animation() = default;
 
-      virtual void animateNextFrame() = 0;
+      // virtual void animateNextFrame() = 0;
+      virtual void animateNextFrame(HexUnit hexUnit) = 0;
 
-      void run();
+      // void run();
+      void run(HexUnit hexUnit);
 };
 
 /*

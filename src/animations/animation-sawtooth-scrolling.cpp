@@ -46,6 +46,8 @@ class SawtoothScrollingTextAnimation : public FrameAnimation {
 
             output_column_offset = (7 + (output_column_offset + 1)) % 7;
 
+            // TODO: Finish when we're done scrolling.
+
             return this->isFinished;
         }
 };

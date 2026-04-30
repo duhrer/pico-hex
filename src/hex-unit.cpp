@@ -54,7 +54,6 @@ void HexUnit::fill(uint32_t colour) {
 
     This class remaps this layout to more easily display different types of
     visualisations.
-/*
 
 */
 
@@ -89,6 +88,7 @@ struct PolarCoords {
     by 5 to get the value in terms of cell radii, i.e. 2.6, 2.64, and 1.7
 
 */
+
 const struct PolarCoords polar_coordinates[37] =
 {
                      {3.0, 120}, {2.6, 100}, {2.6, 80}, {3.0, 60},
@@ -154,7 +154,17 @@ void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int 
         );
 
         if (round(distance) < fill_radius) {
-            uint32_t cell_colour = neopixels.getPixelColor(index);
+            // 
+            // https://greenemath.com/Trigonometry/43/Polar-Equations-Graphs-IILesson.html
+            PolarCoords cell_centre_coords = polar_coordinates[index];
+            double cell_centre_radians = cell_centre_coords.angle * (M_PI / 180);
+
+            float distance = sqrt(
+                pow(fill_centre_radius,2) + pow(cell_centre_coords.radius, 2)
+                - (2 * cell_centre_coords.radius * fill_centre_radius * cos(cell_centre_radians - fill_centre_radians))
+            );
+
+            // uint32_t cell_colour = neopixels.getPixelColor(index);
             if (floor(distance) < fill_radius) {
                 // TODO: Make mixing optional before we enable this
                 // // Fill at 100%, mixing with whatever's there.
@@ -193,21 +203,29 @@ const int ring_cell_indices[4][18] = {
     {  0,  1,  2,  3,  8, 14, 21, 27, 32, 36, 35, 34, 33, 28, 22, 15,  9,  4 }
 };
 
-void HexUnit::setRingPixelColour(uint32_t colour, int ringIndex, int pixelIndex) {
-    int translated_pixel_index = ring_cell_indices[ringIndex][pixelIndex];
+void HexUnit::setRemappedPixelColour(uint32_t colour, int row, int column, const int *index_map, int index_map_columns) {
+    int translated_pixel_index = index_map[(row * index_map_columns) + column];
     if (translated_pixel_index >= 0 && translated_pixel_index < 37 ) {
         this->neopixels.setPixelColor(translated_pixel_index, colour);
     }
-};
+}
 
-uint32_t HexUnit::getRingPixelColour(int ringIndex, int pixelIndex) {
-    int translated_pixel_index = ring_cell_indices[ringIndex][pixelIndex];
+uint32_t HexUnit::getRemappedPixelColour(int row, int column, const int *index_map, int index_map_columns) {
+    int translated_pixel_index = index_map[(row * index_map_columns) + column];
     if (translated_pixel_index < 0 || translated_pixel_index > 36 ) {
         return 0;
     }
     else {
         return this->neopixels.getPixelColor(translated_pixel_index);
     }
+};
+
+void HexUnit::setRingPixelColour(uint32_t colour, int ringIndex, int pixelIndex) {
+    setRemappedPixelColour(colour, ringIndex, pixelIndex, (int *) ring_cell_indices, 18);
+};
+
+uint32_t HexUnit::getRingPixelColour(int ringIndex, int pixelIndex) {
+    return getRemappedPixelColour(ringIndex, pixelIndex, (int *) ring_cell_indices, 18);
 };
 
 void HexUnit::fillRing(uint32_t colour, int ringIndex) {
@@ -253,20 +271,11 @@ const int italic_cell_indices[7][7] = {
 };
 
 void HexUnit::setItalicPixelColour(uint32_t colour, int column, int row) {
-    int cell_index = italic_cell_indices[row][column];
-    if (cell_index != -1) {
-        neopixels.setPixelColor(cell_index, colour);
-    }
+    setRemappedPixelColour(colour, row, column, (int *) italic_cell_indices, 7);
 };
 
 uint32_t HexUnit::getItalicPixelColour(int column, int row) {
-    int cell_index = interlaced_cell_indices[row][column];
-    if (cell_index != -1) {
-        return neopixels.getPixelColor(cell_index);
-    }
-    else {
-        return neopixels.Color(0,0,0);
-    }
+    return getRemappedPixelColour(column, row, (int *) italic_cell_indices, 7);
 };
 
 void HexUnit::fillItalicRow(uint32_t colour, int row) {
@@ -311,20 +320,11 @@ const int sawtooth_cell_indices[7][7] = {
 };
 
 void HexUnit::setSawtoothPixelColour(uint32_t colour, int column, int row) {
-    int cell_index = sawtooth_cell_indices[row][column];
-    if (cell_index != -1) {
-        neopixels.setPixelColor(cell_index, colour);
-    }
+    setRemappedPixelColour(colour, row, column, (int *) sawtooth_cell_indices, 7);
 };
 
 uint32_t HexUnit::getSawtoothPixelColour(int column, int row) {
-    int cell_index = sawtooth_cell_indices[row][column];
-    if (cell_index != -1) {
-        return neopixels.getPixelColor(cell_index);
-    }
-    else {
-        return neopixels.Color(0,0,0);
-    }
+    return getRemappedPixelColour(row, column, (int *) sawtooth_cell_indices, 7);
 };
 
 void HexUnit::fillSawtoothRow(uint32_t colour, int row) {

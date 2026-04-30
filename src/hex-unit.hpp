@@ -6,7 +6,12 @@
 #define MAX_BRIGHTNESS 16
 
 class HexUnit {
-    public:
+    private: 
+        // Generic functions used with different layout maps
+        uint32_t getRemappedPixelColour(int row, int column, const int *index_map, int index_map_columns);
+        void setRemappedPixelColour(uint32_t colour, int row, int column, const int *index_map, int index_map_columns);
+
+        public:
         // Underlying Neopixel object.
         Adafruit_NeoPixel neopixels;
 

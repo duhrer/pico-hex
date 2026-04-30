@@ -22,6 +22,10 @@ HexUnit::HexUnit() {
     BLUE = neopixels.Color(0, MAX_BRIGHTNESS, MAX_BRIGHTNESS);
 }
 
+void HexUnit::begin() {
+    neopixels.begin();
+}
+
 void HexUnit::clear() {
     neopixels.clear();
 }

@@ -17,6 +17,7 @@ class HexUnit {
 
         HexUnit();
 
+        void begin();
         void clear();
         void show();
         void fill(uint32_t colour);

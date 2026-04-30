@@ -13,6 +13,7 @@ int main() {
     stdio_init_all();
 
     HexUnit hex_unit = HexUnit();
+    hex_unit.begin();
 
     RollupAllAnimation rollup_animation;
 

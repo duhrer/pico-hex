@@ -2,38 +2,62 @@
 #define ANIMATION_H
 
 #include "hex-unit.hpp"
+// #include <list>
+#include <vector>
 
 class Animation {      
    public:
       bool isFinished = false;
 
-      // HexUnit hexUnit;
+      Animation() = default;
 
+      virtual bool run(HexUnit hexUnit) = 0;
+};
+
+class FrameAnimation : public Animation {
+   public:
       int msDelayBetweenFrames = 40; // 25 FPS (not counting drawing time)
       int frameNumber = 0;
 
-      // Animation(HexUnit hexUnit);
-      Animation() = default;
+      virtual bool animateNextFrame(HexUnit hexUnit) = 0;
 
-      // virtual void animateNextFrame() = 0;
-      virtual void animateNextFrame(HexUnit hexUnit) = 0;
+      bool run (HexUnit hexUnit) {
+         // Reset so that run can be used for repeats.
+         this -> frameNumber = 0;
+         this -> isFinished = false;
 
-      // void run();
-      void run(HexUnit hexUnit);
+         while (!this -> isFinished) {
+            this->isFinished = this->animateNextFrame(hexUnit);
+            this->frameNumber++;
+            sleep_ms(this->msDelayBetweenFrames);
+         }
+
+         return this->isFinished;
+      }      
 };
 
-/*
-    TODO: Make a bunch of animations, such as:
+class RollupAnimation : public Animation {
+   public:
+      // https://stackoverflow.com/questions/43564387/list-for-abstact-objects
+      // std::list<Animation*> animations;
+      // std::vector<Animation*> animations;
+      Animation* animations[256];
 
-    1. A ring clock.
-    2. A series of colour mixing bodies that move through a polar layout based
-       on gravity.
-    3. scrolling text in interlaced, sawtooth, italic, and reverse italic
-       layouts
-    4. An animated "eye" that opens, looks around, and closes.
-    5. A ring version of our colour mixing algo, where r, g, and b "bands" move
-       within the ring.
+      bool run (HexUnit hexUnit) {
+         // Reset so that run can be used for repeats.
+         this -> isFinished = false;
 
-*/
+         for (Animation* animation : animations) 
+         {
+            if (animation) {
+               animation -> run(hexUnit);              
+            }
+         }
+
+         this->isFinished = true;
+
+         return this->isFinished;
+      }
+};
 
 #endif

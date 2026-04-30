@@ -1,6 +1,6 @@
 #include "animation.hpp"
 
-class PolarEyeSaccadeAnimation : public Animation {
+class PolarEyeSaccadeAnimation : public FrameAnimation {
     private:
         int iris_angle = 0;
         double iris_radius = 1.75;
@@ -8,13 +8,13 @@ class PolarEyeSaccadeAnimation : public Animation {
         double iris_radius_delta = 0.5; // cycles to roundtrip
     public:
         PolarEyeSaccadeAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 50;
         }
 
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             if (this -> frameNumber > 24) {
                 this->isFinished = true;
             }
@@ -47,6 +47,7 @@ class PolarEyeSaccadeAnimation : public Animation {
                     iris_radius = new_iris_radius;
                 }
             }
-        }
 
+            return this->isFinished;
+        }
 };

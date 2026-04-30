@@ -1,7 +1,7 @@
 #include "animation.hpp"
 #include <math.h>
 
-class ItalicSineAnimation : public Animation {
+class ItalicSineAnimation : public FrameAnimation {
     private:
         int sine_offset = 0;
 
@@ -10,12 +10,12 @@ class ItalicSineAnimation : public Animation {
 
     public:
         ItalicSineAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             this->msDelayBetweenFrames = 125;
         }
 
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             if (this -> frameNumber >= 256) {
                 this->isFinished = true;
             }
@@ -37,5 +37,7 @@ class ItalicSineAnimation : public Animation {
 
                 sine_offset++;
             }
-        }
+
+            return this->isFinished;
+        }        
 };

@@ -1,6 +1,6 @@
 #include "animation.hpp"
 
-class PolarEyeRollAnimation : public Animation {
+class PolarEyeRollAnimation : public FrameAnimation {
     private:
         int iris_angle = 0;
         int iris_angle_delta = 20;
@@ -9,13 +9,13 @@ class PolarEyeRollAnimation : public Animation {
 
     public:
         PolarEyeRollAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 40;
         }
 
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             if (this -> frameNumber >= 36) {
                 this->isFinished = true;
             }
@@ -43,6 +43,8 @@ class PolarEyeRollAnimation : public Animation {
 
                 iris_angle = (iris_angle + iris_angle_delta) % 360;
             }
+
+            return this->isFinished;
         }
 
 };

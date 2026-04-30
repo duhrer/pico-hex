@@ -1,6 +1,6 @@
 #include "animation.hpp"
 
-class RingSpinAnimation : public Animation {
+class RingSpinAnimation : public FrameAnimation {
     private:
         int r = MAX_BRIGHTNESS;
         const int delta_r = 1;  // Cycles in 16 passes.
@@ -12,7 +12,7 @@ class RingSpinAnimation : public Animation {
         const int delta_b = -1; // Cycles in 16 passes.
 
     public:
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             if (this -> frameNumber > 64) {
                 this->isFinished = true;
             }
@@ -42,10 +42,12 @@ class RingSpinAnimation : public Animation {
 
                 hexUnit.show();
             }
+
+            return this->isFinished;
         } 
 
         RingSpinAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 100;

@@ -32,7 +32,6 @@ pico_sdk_init()
 set(SOURCE_FILES
     src/pico-hex.cpp
     src/hex-unit.cpp   
-    src/animations/animation.cpp
 )
 
 add_subdirectory(lib/pico_neopixels build)

@@ -2,7 +2,7 @@
 
 #include "letters.h"
 
-class SawtoothScrollingTextAnimation : public Animation {
+class SawtoothScrollingTextAnimation : public FrameAnimation {
     private:
         uint8_t *matrix;
         int matrix_columns;
@@ -14,7 +14,7 @@ class SawtoothScrollingTextAnimation : public Animation {
     // uint8_t *generate_matrix_for_string(char input_string[])
     public:
         SawtoothScrollingTextAnimation(char *string)
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 250;
@@ -27,7 +27,7 @@ class SawtoothScrollingTextAnimation : public Animation {
         }
 
         // Scroll text from left to right.
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             // Display a single letter
             hexUnit.clear();
 
@@ -45,6 +45,8 @@ class SawtoothScrollingTextAnimation : public Animation {
             hexUnit.show();
 
             output_column_offset = (7 + (output_column_offset + 1)) % 7;
+
+            return this->isFinished;
         }
 };
 

@@ -1,6 +1,6 @@
 #include "animation.hpp"
 
-class PolarEyeOpenAnimation : public Animation {
+class PolarEyeOpenAnimation : public FrameAnimation {
     private:
         int iris_angle = 0;
 
@@ -8,13 +8,13 @@ class PolarEyeOpenAnimation : public Animation {
 
     public:
         PolarEyeOpenAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 100;
         }
 
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             // First two seconds are just black, Eye opens over the course of
             // two seconds, Then stays still for two seconds.
         
@@ -100,5 +100,7 @@ class PolarEyeOpenAnimation : public Animation {
 
                 hexUnit.show();
             }
+
+            return this->isFinished;
         }
 };

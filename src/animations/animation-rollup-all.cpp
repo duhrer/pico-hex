@@ -12,7 +12,7 @@
 
 #include "animation-rollup-eye.cpp"
 
-class RollupAllAnimation : public Animation {
+class RollupAllAnimation : public RollupAnimation {
     private:
         // TODO: Make a rollup for these
         RingCycleAnimation ring_cycle_animation;
@@ -22,25 +22,23 @@ class RollupAllAnimation : public Animation {
         ItalicFillAnimation italic_fill_animation;
         ItalicSineAnimation italic_sine_animation;
 
-        // TODO: Make a rollup and add other stages
         RollupEyeAnimation rollup_eye_animation;
 
     public:
-        // Override default run method
-        void run (HexUnit hexUnit) {
-            ring_cycle_animation.run(hexUnit);
-            ring_spin_animation.run(hexUnit);
-
-            italic_fill_animation.run(hexUnit);
-            italic_sine_animation.run(hexUnit);
-
-            rollup_eye_animation.run(hexUnit);
-
-            this->isFinished = true;
-        }        
-
-        // Empty required frame animation method
-        void animateNextFrame(HexUnit hexUnit) {
+        RollupAllAnimation ()
+        : RollupAnimation()
+        {
+            animations[0] = &ring_cycle_animation;
+            animations[1] = &ring_spin_animation;
+            animations[2] = &italic_fill_animation;
+            animations[3] = &italic_sine_animation;
+            animations[4] = &rollup_eye_animation;
+ 
+            // https://stackoverflow.com/questions/43564387/list-for-abstact-objects
+            // animations.push_back(&ring_cycle_animation);
+            // animations.push_back(&ring_spin_animation);
+            // animations.push_back(&italic_fill_animation);
+            // animations.push_back(&italic_sine_animation);
+            // animations.push_back(&rollup_eye_animation);
         }
-
 };

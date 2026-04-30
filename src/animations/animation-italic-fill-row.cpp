@@ -1,8 +1,7 @@
 #include "animation.hpp"
-
 #include "letters.h"
 
-class ItalicFillAnimation : public Animation {
+class ItalicFillAnimation : public FrameAnimation {
     private:
         int dividing_column = 3;
         int column_delta = -1;
@@ -12,13 +11,13 @@ class ItalicFillAnimation : public Animation {
         // ItalicFillAnimation(HexUnit hexUnit)
         // : Animation(hexUnit)
         ItalicFillAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             this->msDelayBetweenFrames = 100;
         }
 
         // Scroll text from left to right.
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             if (this -> frameNumber >= 112) {
                 this->isFinished = true;
             }
@@ -50,6 +49,8 @@ class ItalicFillAnimation : public Animation {
                 }
                 dividing_column += column_delta;
             }
+
+            return this->isFinished;
         }
 };
 

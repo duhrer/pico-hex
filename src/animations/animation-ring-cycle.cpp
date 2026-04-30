@@ -1,6 +1,6 @@
 #include "animation.hpp"
 
-class RingCycleAnimation : public Animation {
+class RingCycleAnimation : public FrameAnimation {
     private:
         int ring_index = 4;
 
@@ -14,7 +14,7 @@ class RingCycleAnimation : public Animation {
         const int delta_b = -1; // Cycles in 16 passes.
 
     public:
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             // Limit the number of cycles so that we will eventually switch modes.
             if (this -> frameNumber >= 32) {
                 this->isFinished = true;
@@ -33,10 +33,12 @@ class RingCycleAnimation : public Animation {
                 hexUnit.show();
                 this -> ring_index = (4 + (this->ring_index) - 1) % 4;
             }
+
+            return this->isFinished;
         } 
 
         RingCycleAnimation()
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 80;

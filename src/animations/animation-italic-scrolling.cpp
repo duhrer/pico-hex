@@ -2,7 +2,7 @@
 
 #include "letters.h"
 
-class ItalicScrollingTextAnimation : public Animation {
+class ItalicScrollingTextAnimation : public FrameAnimation {
     private:
         uint8_t *matrix;
         int matrix_columns;
@@ -14,7 +14,7 @@ class ItalicScrollingTextAnimation : public Animation {
     // uint8_t *generate_matrix_for_string(char input_string[])
     public:
         ItalicScrollingTextAnimation(char *string)
-        : Animation()
+        : FrameAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 250;
@@ -27,7 +27,7 @@ class ItalicScrollingTextAnimation : public Animation {
         }
 
         // Scroll text from left to right.
-        void animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit hexUnit) {
             // TODO: Display a single letter
             hexUnit.clear();
 
@@ -82,6 +82,10 @@ class ItalicScrollingTextAnimation : public Animation {
             // }
 
             output_column_offset = (7 + (output_column_offset + 1)) % 7;
+
+            // TODO: Finish when we're done scrolling.
+
+            return this->isFinished;
         }
 };
 

@@ -3,13 +3,13 @@
 class RingSpinAnimation : public FrameAnimation {
     private:
         int r = MAX_BRIGHTNESS;
-        const int delta_r = 1;  // Cycles in 16 passes.
+        const int delta_r = 16;  // Cycles in 16 passes.
 
         int g = MAX_BRIGHTNESS / 4;
-        const int delta_g = 2;  // Cycles in 8 passes.
+        const int delta_g = 32;  // Cycles in 8 passes.
 
         int b = MAX_BRIGHTNESS / 2;
-        const int delta_b = -1; // Cycles in 16 passes.
+        const int delta_b = -16; // Cycles in 16 passes.
 
     public:
         bool animateNextFrame(HexUnit hexUnit) {
@@ -19,11 +19,13 @@ class RingSpinAnimation : public FrameAnimation {
             else {
                 hexUnit.clear();
 
+                int brightness_percentage = (hexUnit.brightness * 100) / MAX_BRIGHTNESS;
+
                 this -> r = (this->r + MAX_BRIGHTNESS + this->delta_r) % MAX_BRIGHTNESS;
                 this -> g = (this->g + MAX_BRIGHTNESS + this->delta_g) % MAX_BRIGHTNESS;
                 this -> b = (this->b + MAX_BRIGHTNESS + this->delta_b) % MAX_BRIGHTNESS;
 
-                uint32_t colour = hexUnit.neopixels.Color(r, g, b);
+                uint32_t colour = hexUnit.neopixels.Color((r * brightness_percentage) / 100, (g * brightness_percentage) / 100, (b * brightness_percentage) / 100);
 
                 hexUnit.setRingPixelColour(colour, 0, 0);
 

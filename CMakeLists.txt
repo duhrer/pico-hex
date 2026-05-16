@@ -5,6 +5,7 @@ set(NAME pico-hex)
 set(PICO_PLATFORM rp2350)
 set(PICO_BOARD pico2_w)
 
+
 # Set the default build type to Debug if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
@@ -51,6 +52,7 @@ target_link_libraries(${NAME}
     pico_neopixel
     hardware_pio
     pico_cyw43_arch_none
+    pico_time
     pico_bootsel_via_double_reset
 )
 

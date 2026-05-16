@@ -2,24 +2,30 @@
 #include <math.h>
 
 #define TOTAL_NEOPIXELS 37
-#define NEOPIXELS_PIN 15
+#define NEOPIXELS_PIN 10
 
 HexUnit::HexUnit() {
     neopixels = Adafruit_NeoPixel(TOTAL_NEOPIXELS, NEOPIXELS_PIN, NEO_GRB + NEO_KHZ800);
 
-    // We have to do these here so we can use the Color method from the
-    // Neopixels object passed to our constructor.
-    row_colours[0] = neopixels.Color(MAX_BRIGHTNESS, 0, 0);
-    row_colours[1] = neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS/2, 0);
-    row_colours[2] = neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS, 0);
-    row_colours[3] = neopixels.Color( 0, MAX_BRIGHTNESS, 0);
-    row_colours[4] = neopixels.Color( 0, 0, MAX_BRIGHTNESS);
-    row_colours[5] = neopixels.Color(MAX_BRIGHTNESS/2, 0, MAX_BRIGHTNESS);
-    row_colours[6] = neopixels.Color(MAX_BRIGHTNESS, 0, MAX_BRIGHTNESS);
+    // We have to initialise the colours now because we need the Color method
+    // from the neopixel object (for now).
+    updateColours();
+}
+
+void HexUnit::updateColours() {
+    row_colours[0] = neopixels.Color(brightness, 0, 0);
+    row_colours[1] = neopixels.Color(brightness, brightness/2, 0);
+    row_colours[2] = neopixels.Color(brightness, brightness, 0);
+    row_colours[3] = neopixels.Color( 0, brightness, 0);
+    row_colours[4] = neopixels.Color( 0, 0, brightness);
+    row_colours[5] = neopixels.Color(brightness/2, 0, brightness);
+    row_colours[6] = neopixels.Color(brightness, 0, brightness);
 
     BLACK = neopixels.Color(0,0,0);
-    WHITE = neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS, MAX_BRIGHTNESS);
-    BLUE = neopixels.Color(0, MAX_BRIGHTNESS, MAX_BRIGHTNESS);
+    WHITE = neopixels.Color(brightness, brightness, brightness);
+    BLUE = neopixels.Color(0, brightness, brightness);
+
+    clear();
 }
 
 void HexUnit::begin() {
@@ -30,6 +36,7 @@ void HexUnit::clear() {
     neopixels.clear();
 }
 
+static int iteration = 0;
 void HexUnit::show() {
     neopixels.show();
 }
@@ -39,6 +46,26 @@ void HexUnit::show() {
 void HexUnit::fill(uint32_t colour) {
     neopixels.fill(colour);
 }
+
+void HexUnit::decreaseBrightness() {
+    if (brightness >= 4) {
+        // We're aiming for a power of two minus one.
+        brightness = ((brightness + 1)/2) - 1;
+
+        updateColours();
+    }
+}
+
+void HexUnit::increaseBrightness() {
+    // We're aiming for a power of two minus one.
+    if (brightness <= 128) {
+        brightness *= ((brightness + 1) * 2) - 1;
+
+        updateColours();
+    }
+}
+
+
 
 /*
 
@@ -86,7 +113,12 @@ struct PolarCoords {
 
     I measured X as 13 mm, Y as 13.2 mm, Z as 8.5 mm, and then divided each
     by 5 to get the value in terms of cell radii, i.e. 2.6, 2.64, and 1.7
-
+X, 80}, {3.0, 60},
+                {Y, 140}, {2.0, 120}, {Z, 90}, {2.0, 60}, {Y, 40},
+         {X, 160}, {Z, 150}, {1.0, 120}, {1.0, 60}, {Z, 30}, {X, 20},
+    {3.0, 180}, {2.0, 180}, {1.0, 180}, {0.0, 0}, {1.0, 0}, {2.0, 0}, {3.0, 0},
+         {X, 200}, {Z, 210}, {1.0, 240}, {1.0, 300}, {Z, 330.0}, {X, 340},
+                {Y, 220}, {2.0, 240}, {Z, 270}
 */
 
 const struct PolarCoords polar_coordinates[37] =
@@ -367,3 +399,64 @@ const int reverse_italic_cell_indices[7][7] = {
     { 28,  29,  30,  31,  32,  -1,  -1},
     { 33,  34,  35,  36,  -1,  -1,  -1}
 };
+
+/*
+
+    A layout to treat the unit as three faces of a cube with optional coloured
+    vertices. Face 1:
+
+          00  01  02
+        04  05  06
+      09  10  11
+
+    Face 2:
+
+      22  23  24
+        28  29  30
+          33  34  35
+
+    Face 3:
+         08
+       13  14
+     19  20  21
+       26  27
+         32
+
+    Vertices:
+                      03
+                    07
+                  12
+    15  16  17  18 
+                  25 
+                    31
+                      36         
+*/
+
+// All faces except for the vertices are arranged from top to bottom and left to
+// right, to support setting individual pixel values by row and column.
+const int cubic_cell_indices[4][10] = {
+    {0, 1, 2, 4, 5, 6, 9, 10, 11, -1},
+    {22, 23, 24, 28, 29, 30, 33, 34, 35, -1},
+    {19, 13, 8, 26, 20, 14, 32, 27, 21, -1},
+    {3, 7, 12, 15, 16, 17, 18, 25, 31, 36}
+};
+
+void HexUnit::fillCubicFace(uint32_t colour, int face) {
+    for (int face_cell_index = 0; face_cell_index < 10; face_cell_index++) {
+        int real_cell_index = cubic_cell_indices[face][face_cell_index];
+        if (real_cell_index != -1) {
+            neopixels.setPixelColor(real_cell_index, colour);
+        }
+    }
+}
+
+void HexUnit::setCubicPixelColor(uint32_t colour, int face, int row, int column) {
+    int cell_index = cubic_cell_indices[face][(row * 3) + column];
+
+    if (cell_index != -1) {
+        neopixels.setPixelColor(cell_index, colour);
+    }
+}
+
+// I could add row and column filling options depending, but this seems
+// sufficient for a first pass.

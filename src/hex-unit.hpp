@@ -3,13 +3,18 @@
 
 #include "Adafruit_NeoPixel.hpp"
 
-#define MAX_BRIGHTNESS 16
+// We support brightness levels as powers of two (minus one). Keep the
+// brightness low to avoid shortening the life of the lights.
+#define MIN_BRIGHTNESS 3
+#define MAX_BRIGHTNESS 63
 
 class HexUnit {
     private: 
         // Generic functions used with different layout maps
         uint32_t getRemappedPixelColour(int row, int column, const int *index_map, int index_map_columns);
         void setRemappedPixelColour(uint32_t colour, int row, int column, const int *index_map, int index_map_columns);
+
+        void updateColours();
 
         public:
         // Underlying Neopixel object.
@@ -20,12 +25,17 @@ class HexUnit {
         uint32_t BLUE;
         uint32_t row_colours[7];
 
+        uint8_t brightness = 16;
+
         HexUnit();
 
         void begin();
         void clear();
         void show();
         void fill(uint32_t colour);
+
+        void decreaseBrightness();
+        void increaseBrightness();
 
         // Polar Layout
         void fillPolarRegion(uint32_t colour, int distanceFromCentre, int degrees, int fillRadius);
@@ -61,6 +71,9 @@ class HexUnit {
         void fillItalicRow(uint32_t colour, int row, int start_column, int num_cells);
         // void fillItalicLayoutFromMatrix(uint32_t *matrix);
         // void fillItalicLayoutFromMatrix(uint32_t *matrix, int matrix_start_column, int matrix_start_row);
+
+        void fillCubicFace(uint32_t colour, int face);
+        void setCubicPixelColor(uint32_t colour, int face, int row, int column);
 
         // Reverse Italic Layout
         // void setReverseItalicPixelColour(uint32_t colour, int column, int row) {};

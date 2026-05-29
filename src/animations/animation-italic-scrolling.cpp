@@ -27,23 +27,23 @@ class ItalicScrollingTextAnimation : public FrameAnimation {
         }
 
         // Scroll text from left to right.
-        bool animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit *hexUnit) {
             // TODO: Display a single letter
-            hexUnit.clear();
+            hexUnit -> clear();
 
             for (int row = 0; row < 7; row++) {
-                // hexUnit.fillItalicRow(row_colours[row], row);
+                // hexUnit -> fillItalicRow(row_colours[row], row);
                 for (int column = 0; column < 7; column++) {
                     int offset_column = (column + output_column_offset) % 7;
                     if (offset_column < 6 && (LETTER_Q[row][offset_column] != 0)) {
-                        // hexUnit.setItalicPixelColour(BLACK, column, row);
-                        // hexUnit.setItalicPixelColour(WHITE, column, row);
-                        hexUnit.setItalicPixelColour(hexUnit.row_colours[row], column, row);
+                        // hexUnit -> setItalicPixelColour(BLACK, column, row);
+                        // hexUnit -> setItalicPixelColour(WHITE, column, row);
+                        hexUnit -> setItalicPixelColour(hexUnit -> row_colours[row], column, row);
                     }
                 }
             }
 
-            hexUnit.show();
+            hexUnit -> show();
 
             // TODO: Display a series of single letters that don't move.
 
@@ -53,7 +53,7 @@ class ItalicScrollingTextAnimation : public FrameAnimation {
 
             // TODO: Test the composition functions.
             // if (output_column_offset < 7) {
-            //     hexUnit.clear();
+            //     hexUnit -> clear();
 
             //     // If output_column_offset is 6, we should be drawing column 0
             //     // of the matrix in row 6, and nothing in the other columns.
@@ -72,13 +72,13 @@ class ItalicScrollingTextAnimation : public FrameAnimation {
             //                 uint8_t saturation = *((uint8_t *) matrix + ((row * matrix_columns) + column));
 
             //                 if (saturation > 0) {
-            //                     hexUnit.setItalicPixelColour(row_colours[row], column, row);
+            //                     hexUnit -> setItalicPixelColour(row_colours[row], column, row);
             //                 }
             //             }
             //         }
             //     }
 
-            //     hexUnit.show();
+            //     hexUnit -> show();
             // }
 
             output_column_offset = (7 + (output_column_offset + 1)) % 7;

@@ -10,6 +10,10 @@
 
 #include "animations/animation-rollup-all.cpp"
 
+// TODO: Remove
+#include "Adafruit_NeoPixel.hpp"
+
+
 static bool keep_running = true;
 
 #define DECREASE_BRIGHTNESS_PIN 16
@@ -43,21 +47,24 @@ void button_irq_callback(uint gpio, uint32_t event_mask) {
 int main() {
     stdio_init_all();
     
-    uint32_t event_mask = GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE;
+    // uint32_t event_mask = GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE;
 
-    gpio_init(DECREASE_BRIGHTNESS_PIN);
-    gpio_set_dir(DECREASE_BRIGHTNESS_PIN, GPIO_IN);
-    gpio_set_irq_enabled_with_callback(DECREASE_BRIGHTNESS_PIN, event_mask, true, &button_irq_callback);
+    // gpio_init(DECREASE_BRIGHTNESS_PIN);
+    // gpio_set_dir(DECREASE_BRIGHTNESS_PIN, GPIO_IN);
+    // gpio_set_irq_enabled_with_callback(DECREASE_BRIGHTNESS_PIN, event_mask, true, &button_irq_callback);
 
-    gpio_init(INCREASE_BRIGHTNESS_PIN);
-    gpio_set_dir(INCREASE_BRIGHTNESS_PIN, GPIO_IN);
-    gpio_set_irq_enabled_with_callback(INCREASE_BRIGHTNESS_PIN, event_mask, true, &button_irq_callback);
+    // gpio_init(INCREASE_BRIGHTNESS_PIN);
+    // gpio_set_dir(INCREASE_BRIGHTNESS_PIN, GPIO_IN);
+    // gpio_set_irq_enabled_with_callback(INCREASE_BRIGHTNESS_PIN, event_mask, true, &button_irq_callback);
+
+    // Initial pause to help us know that the unit has been reset.
+    sleep_ms(1000);
 
     hex_unit.begin();
 
     RollupAllAnimation rollup_animation;
 
     while (keep_running) {
-        rollup_animation.run(hex_unit);
+        rollup_animation.run(&hex_unit);
     }
 }

@@ -27,22 +27,22 @@ class SawtoothScrollingTextAnimation : public FrameAnimation {
         }
 
         // Scroll text from left to right.
-        bool animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit *hexUnit) {
             // Display a single letter
-            hexUnit.clear();
+            hexUnit -> clear();
 
             for (int row = 0; row < 7; row++) {
-                hexUnit.fillSawtoothRow(hexUnit.row_colours[row], row);
+                hexUnit -> fillSawtoothRow(hexUnit -> row_colours[row], row);
  
                 for (int column = 0; column < 7; column++) {
                     int offset_column = (column + output_column_offset) % 7;
                     if (offset_column < 6 && (LETTER_S[row][offset_column] != 0)) {
-                        hexUnit.setSawtoothPixelColour(hexUnit.BLACK, column, row);
+                        hexUnit -> setSawtoothPixelColour(hexUnit -> BLACK, column, row);
                     }
                 }
             }
 
-            hexUnit.show();
+            hexUnit -> show();
 
             output_column_offset = (7 + (output_column_offset + 1)) % 7;
 

@@ -11,7 +11,7 @@ class Animation {
 
       Animation() = default;
 
-      virtual bool run(HexUnit hexUnit) = 0;
+      virtual bool run(HexUnit *hexUnit) = 0;
 };
 
 class FrameAnimation : public Animation {
@@ -19,9 +19,9 @@ class FrameAnimation : public Animation {
       int msDelayBetweenFrames = 40; // 25 FPS (not counting drawing time)
       int frameNumber = 0;
 
-      virtual bool animateNextFrame(HexUnit hexUnit) = 0;
+      virtual bool animateNextFrame(HexUnit *hexUnit) = 0;
 
-      bool run (HexUnit hexUnit) {
+      bool run (HexUnit *hexUnit) {
          // Reset so that run can be used for repeats.
          this -> frameNumber = 0;
          this -> isFinished = false;
@@ -43,7 +43,7 @@ class RollupAnimation : public Animation {
       // std::vector<Animation*> animations;
       Animation* animations[256];
 
-      bool run (HexUnit hexUnit) {
+      bool run (HexUnit *hexUnit) {
          // Reset so that run can be used for repeats.
          this -> isFinished = false;
 

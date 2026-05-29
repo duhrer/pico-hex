@@ -15,31 +15,31 @@ class PolarEyeRollAnimation : public FrameAnimation {
             this->msDelayBetweenFrames = 40;
         }
 
-        bool animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit *hexUnit) {
             if (this -> frameNumber >= 36) {
                 this->isFinished = true;
             }
             else {
-                // hexUnit.clear();
+                // hexUnit -> clear();
 
-                hexUnit.fill(hexUnit.WHITE);
+                hexUnit -> fill(hexUnit -> WHITE);
 
                 // Start in the centre
                 // TODO: Test it off centre
-                hexUnit.fillPolarRegion(hexUnit.BLUE, iris_radius, iris_angle, 3);
+                hexUnit -> fillPolarRegion(hexUnit -> BLUE, iris_radius, iris_angle, 3);
 
                 // Draw the pupil
-                hexUnit.fillPolarRegion(hexUnit.BLACK, iris_radius, iris_angle, 2);
+                hexUnit -> fillPolarRegion(hexUnit -> BLACK, iris_radius, iris_angle, 2);
 
                 // Draw the "gleam"
 
                 // Dead centre
-                hexUnit.fillPolarRegion(hexUnit.WHITE, iris_radius, iris_angle, 1);
+                hexUnit -> fillPolarRegion(hexUnit -> WHITE, iris_radius, iris_angle, 1);
                 
                 // TODO: Move the iris around side to side
                 // TODO: Periodically add a "blink".
 
-                hexUnit.show();
+                hexUnit -> show();
 
                 iris_angle = (iris_angle + iris_angle_delta) % 360;
             }

@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.13)
 set(NAME pico-hex)
 
 set(PICO_PLATFORM rp2350)
-set(PICO_BOARD pico2_w)
 
+#set(PICO_BOARD pico2_w)
+set(PICO_BOARD pimoroni_pico_plus2_w_rp2350)
 
 # Set the default build type to Debug if not specified
 if(NOT CMAKE_BUILD_TYPE)

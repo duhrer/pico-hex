@@ -17,32 +17,32 @@ class ItalicFillAnimation : public FrameAnimation {
         }
 
         // Scroll text from left to right.
-        bool animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit *hexUnit) {
             if (this -> frameNumber >= 112) {
                 this->isFinished = true;
             }
             else {
-                hexUnit.clear();
+                hexUnit -> clear();
 
                 for (int row = 0; row < 7; row++) {
-                    uint32_t main_colour = hexUnit.row_colours[row];
-                    uint32_t alternate_colour = hexUnit.row_colours[6-row];
+                    uint32_t main_colour = hexUnit -> row_colours[row];
+                    uint32_t alternate_colour = hexUnit -> row_colours[6-row];
 
                     if (dividing_column > 0) {
                         // Fill the whole row with the primary colour.
-                        hexUnit.fillItalicRow(main_colour, row);
+                        hexUnit -> fillItalicRow(main_colour, row);
                     }
 
                     // Overwrite half the row with a secondary colour.
-                    hexUnit.fillItalicRow(alternate_colour, row, dividing_column);
+                    hexUnit -> fillItalicRow(alternate_colour, row, dividing_column);
 
                     // Draw a clear dividing line between the two areas
                     if (dividing_column > 0 && dividing_column < 6) {
-                        hexUnit.setItalicPixelColour(hexUnit.BLACK, dividing_column, row);
+                        hexUnit -> setItalicPixelColour(hexUnit -> BLACK, dividing_column, row);
                     }
                 }
 
-                hexUnit.show();
+                hexUnit -> show();
 
                 if (dividing_column == 0 || dividing_column == 6) {
                     column_delta *= -1;

@@ -15,12 +15,12 @@ class ItalicSineAnimation : public FrameAnimation {
             this->msDelayBetweenFrames = 125;
         }
 
-        bool animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit *hexUnit) {
             if (this -> frameNumber >= 256) {
                 this->isFinished = true;
             }
             else {
-                hexUnit.clear();
+                hexUnit -> clear();
 
                 // Offset the row colours using an animated sine pattern.
                 for (int row = 0; row < 7; row++) {
@@ -28,12 +28,12 @@ class ItalicSineAnimation : public FrameAnimation {
                         double radians = ((2.0 * M_PI) / wavelength) * (column + sine_offset);
                         int offset_row = row + (sin(radians) * amplitude);
 
-                        uint32_t colour = (offset_row >= 0 && offset_row <= 6) ? hexUnit.row_colours[offset_row] : hexUnit.BLACK;
-                        hexUnit.setItalicPixelColour(colour, column, row);
+                        uint32_t colour = (offset_row >= 0 && offset_row <= 6) ? hexUnit -> row_colours[offset_row] : hexUnit -> BLACK;
+                        hexUnit -> setItalicPixelColour(colour, column, row);
                     }
                 }
 
-                hexUnit.show();
+                hexUnit -> show();
 
                 sine_offset++;
             }

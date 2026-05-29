@@ -14,25 +14,25 @@ class PolarEyeSaccadeAnimation : public FrameAnimation {
             this->msDelayBetweenFrames = 50;
         }
 
-        bool animateNextFrame(HexUnit hexUnit) {
+        bool animateNextFrame(HexUnit *hexUnit) {
             if (this -> frameNumber > 24) {
                 this->isFinished = true;
             }
             else {
-                // hexUnit.clear();
+                // hexUnit -> clear();
 
-                hexUnit.fill(hexUnit.WHITE);
+                hexUnit -> fill(hexUnit -> WHITE);
 
                 // Start in the centre
-                hexUnit.fillPolarRegion(hexUnit.BLUE, iris_radius, iris_angle, 3);
+                hexUnit -> fillPolarRegion(hexUnit -> BLUE, iris_radius, iris_angle, 3);
 
                 // Draw the pupil
-                hexUnit.fillPolarRegion(hexUnit.BLACK, iris_radius, iris_angle, 2);
+                hexUnit -> fillPolarRegion(hexUnit -> BLACK, iris_radius, iris_angle, 2);
 
                 // Draw the "gleam"
-                hexUnit.fillPolarRegion(hexUnit.WHITE, iris_radius, iris_angle, 1);
+                hexUnit -> fillPolarRegion(hexUnit -> WHITE, iris_radius, iris_angle, 1);
                 
-                hexUnit.show();
+                hexUnit -> show();
 
                 // Move the iris around side to side
                 double new_iris_radius = (iris_radius + iris_radius_delta);

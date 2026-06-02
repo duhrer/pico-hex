@@ -33,7 +33,8 @@ pico_sdk_init()
 
 set(SOURCE_FILES
     src/pico-hex.cpp
-    src/hex-unit.cpp   
+    src/helpful-neopixel.cpp
+    src/hex-unit.cpp
 )
 
 add_subdirectory(lib/pico_neopixels build)
@@ -54,6 +55,7 @@ target_link_libraries(${NAME}
     hardware_pio
     pico_cyw43_arch_none
     pico_time
+    pico_rand
     pico_bootsel_via_double_reset
 )
 

@@ -1,9 +1,11 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
+#include "pico/rand.h"
+
 #include "hex-unit.hpp"
 // #include <list>
-#include <vector>
+// #include <vector>
 
 class Animation {      
    public:
@@ -41,7 +43,7 @@ class RollupAnimation : public Animation {
       // https://stackoverflow.com/questions/43564387/list-for-abstact-objects
       // std::list<Animation*> animations;
       // std::vector<Animation*> animations;
-      Animation* animations[256];
+      Animation* animations[16];
 
       bool run (HexUnit *hexUnit) {
          // Reset so that run can be used for repeats.
@@ -55,6 +57,36 @@ class RollupAnimation : public Animation {
          }
 
          this->isFinished = true;
+
+         return this->isFinished;
+      }
+};
+
+class RandomisingRollupAnimation : public Animation {
+   private:
+      // bit register to ensure that each animation is run exactly once.
+      uint16_t animations_used = 0;
+
+   public:
+      Animation* animations[16];
+
+      bool run (HexUnit *hexUnit) {
+         this -> isFinished = false;
+
+         int animations_run = 0;
+
+         while (animations_run < 16) {
+            int animation_index = get_rand_32() % 16;
+
+            if (((animations_used >> animation_index) & 1) == 0) {
+               if (animations[animation_index]) {
+                  animations[animation_index] -> run(hexUnit);
+               }
+               
+               animation_index |= 1 << animation_index;
+               animations_run++;
+            }
+         }
 
          return this->isFinished;
       }

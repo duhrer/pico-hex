@@ -1,17 +1,18 @@
-#include "animation.hpp"
+#include "animation-polar-eye.hpp"
 
-class PolarEyeSaccadeAnimation : public FrameAnimation {
+class PolarEyeSaccadeAnimation : public PolarEyeAnimation {
     private:
-        int iris_angle = 0;
-        double iris_radius = 1.75;
-        double max_iris_radius = 3;
-        double iris_radius_delta = 0.5; // cycles to roundtrip
+        double max_radius = 3;
+        double radius_delta = 0.5;
     public:
         PolarEyeSaccadeAnimation()
-        : FrameAnimation()
+        : PolarEyeAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 50;
+
+            angle = 0;
+            radius = 1.75;
         }
 
         bool animateNextFrame(HexUnit *hexUnit) {
@@ -19,32 +20,32 @@ class PolarEyeSaccadeAnimation : public FrameAnimation {
                 this->isFinished = true;
             }
             else {
-                // hexUnit -> clear();
+                hexUnit -> clear();
 
                 hexUnit -> fill(hexUnit -> WHITE);
 
                 // Start in the centre
-                hexUnit -> fillPolarRegion(hexUnit -> BLUE, iris_radius, iris_angle, 3);
+                hexUnit -> fillPolarRegion(hexUnit -> BLUE, radius, angle, iris_fill_radius);
 
                 // Draw the pupil
-                hexUnit -> fillPolarRegion(hexUnit -> BLACK, iris_radius, iris_angle, 2);
+                hexUnit -> fillPolarRegion(hexUnit -> BLACK, radius, angle, pupil_fill_radius);
 
                 // Draw the "gleam"
-                hexUnit -> fillPolarRegion(hexUnit -> WHITE, iris_radius, iris_angle, 1);
+                hexUnit -> fillPolarRegion(hexUnit -> WHITE, radius, angle, shine_fill_radius);
                 
                 hexUnit -> show();
 
                 // Move the iris around side to side
-                double new_iris_radius = (iris_radius + iris_radius_delta);
-                if (new_iris_radius < 0 ) {
-                    iris_radius_delta *= -1.0;
-                    iris_angle = (iris_angle + 180) % 360;
+                double new_radius = (radius + radius_delta);
+                if (new_radius < 0 ) {
+                    radius_delta *= -1.0;
+                    angle = (angle + 180) % 360;
                 }
-                else if (new_iris_radius > max_iris_radius) {
-                    iris_radius_delta *= -1.0;
+                else if (new_radius > max_radius) {
+                    radius_delta *= -1.0;
                 }
                 else {
-                    iris_radius = new_iris_radius;
+                    radius = new_radius;
                 }
             }
 

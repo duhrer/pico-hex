@@ -15,7 +15,11 @@
 
 #include "animation-cubic-cycle.cpp"
 
-class RollupAllAnimation : public RollupAnimation {
+#include "animation-polar-flame.cpp"
+
+#include "animation-rollup-mixing.cpp"
+
+class RollupAllAnimation : public RandomisingRollupAnimation {
     private:
         // TODO: Make a rollup for these
         RingCycleAnimation ring_cycle_animation;
@@ -30,9 +34,13 @@ class RollupAllAnimation : public RollupAnimation {
 
         CubicCycleAnimation cubic_cycle_animation;
 
+        PolarFlameAnimation polar_flame_animation;
+
+        RollupMixingAnimation rollup_polar_mixing_animation;
+
     public:
         RollupAllAnimation ()
-        : RollupAnimation()
+        : RandomisingRollupAnimation()
         {
             animations[0] = &ring_cycle_animation;
             animations[1] = &ring_spin_animation;
@@ -41,7 +49,9 @@ class RollupAllAnimation : public RollupAnimation {
             animations[4] = &italic_sine_animation;
             animations[5] = &rollup_eye_animation;
             animations[6] = &cubic_cycle_animation;
- 
+            animations[7] = &polar_flame_animation;
+            animations[8] = &rollup_polar_mixing_animation;
+            
             // https://stackoverflow.com/questions/43564387/list-for-abstact-objects
             // animations.push_back(&ring_cycle_animation);
             // animations.push_back(&ring_spin_animation);

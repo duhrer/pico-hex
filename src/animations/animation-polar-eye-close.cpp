@@ -1,17 +1,15 @@
-#include "animation.hpp"
+#include "animation-polar-eye.hpp"
 
-class PolarEyeCloseAnimation : public FrameAnimation {
-    private:
-        int iris_angle = 0;
-
-        double iris_radius = 1.75;
-
+class PolarEyeCloseAnimation : public PolarEyeAnimation {
     public:
         PolarEyeCloseAnimation()
-        : FrameAnimation()
+        : PolarEyeAnimation()
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 100;
+
+            angle = 0;
+            radius = 1.75;
         }
 
         bool animateNextFrame(HexUnit *hexUnit) {
@@ -33,13 +31,13 @@ class PolarEyeCloseAnimation : public FrameAnimation {
                 hexUnit -> fill(hexUnit -> WHITE);
     
                 // Draw the iris
-                hexUnit -> fillPolarRegion(hexUnit -> BLUE, iris_radius, iris_angle, 3);
+                hexUnit -> fillPolarRegion(hexUnit -> BLUE, radius, angle, iris_fill_radius);
 
                 // Draw the pupil
-                hexUnit -> fillPolarRegion(hexUnit -> BLACK, iris_radius, iris_angle, 2);
+                hexUnit -> fillPolarRegion(hexUnit -> BLACK, radius, angle, pupil_fill_radius);
 
                 // Draw the "gleam"
-                hexUnit -> fillPolarRegion(hexUnit -> WHITE, iris_radius, iris_angle, 1);
+                hexUnit -> fillPolarRegion(hexUnit -> WHITE, radius, angle, shine_fill_radius);
 
                 // Draw the lids over the eye using the "italic" functions.
                 if (frameNumber > 7) {

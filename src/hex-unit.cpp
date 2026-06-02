@@ -5,7 +5,7 @@
 #define NEOPIXELS_PIN 10
 
 HexUnit::HexUnit() {
-    neopixels = Adafruit_NeoPixel(TOTAL_NEOPIXELS, NEOPIXELS_PIN, NEO_GRB + NEO_KHZ800);
+    neopixels = HelpfulNeopixel(TOTAL_NEOPIXELS, NEOPIXELS_PIN, NEO_GRB + NEO_KHZ800);
 
     // We have to initialise the colours now because we need the Color method
     // from the neopixel object (for now).
@@ -36,7 +36,6 @@ void HexUnit::clear() {
     neopixels.clear();
 }
 
-static int iteration = 0;
 void HexUnit::show() {
     neopixels.show();
 }
@@ -66,7 +65,6 @@ void HexUnit::increaseBrightness() {
 }
 
 
-
 /*
 
     The base layout of the hex unit pixel indexes is:
@@ -90,7 +88,6 @@ struct PolarCoords {
     double radius;
     int angle;
 };
-
 
 // Lookup table for polar coordinates for all pixels. Radius is the distance
 // from the midpoint.  Along the three major axes, each unit is 5mm apart, which
@@ -132,45 +129,126 @@ const struct PolarCoords polar_coordinates[37] =
                      {3.0, 240}, {2.6, 260}, {2.6, 280}, {3.0, 300}
 };
 
-// Scale percentage should be out of 100.
+// Scale a colour proportionately. Scale percentage should be out of 100.
 uint32_t scaleColourSaturation(uint32_t original_colour, int scale_percentage) {
     uint8_t first_byte  = original_colour & 0xFF;
-    uint8_t second_byte = original_colour & (0xFF << 8);
-    uint8_t third_byte  = original_colour & (0xFF << 16);
-    uint8_t fourth_byte = original_colour & (0xFF << 24);
+    uint8_t second_byte = original_colour >> 8 & 0xFF;
+    uint8_t third_byte  = original_colour >> 16 & 0xFF;
+    uint8_t fourth_byte = original_colour >> 24 & 0xFF;
 
-    uint8_t scaled_first_byte  = first_byte * scale_percentage / 100;
-    uint8_t scaled_second_byte = second_byte * scale_percentage / 100;
-    uint8_t scaled_third_byte  = third_byte * scale_percentage / 100;
-    uint8_t scaled_fourth_byte  = fourth_byte * scale_percentage / 100;
+    uint8_t scaled_first_byte  = (first_byte * scale_percentage) / 100;
+    uint8_t scaled_second_byte = (second_byte * scale_percentage) / 100;
+    uint8_t scaled_third_byte  = (third_byte * scale_percentage) / 100;
+    uint8_t scaled_fourth_byte  = (fourth_byte * scale_percentage) / 100;
 
     uint32_t scaled_colour = scaled_first_byte | (scaled_second_byte << 8) | (scaled_third_byte << 16) | (scaled_fourth_byte << 24);
 
     return scaled_colour;
 }
 
-uint32_t averageColours(uint32_t colour1, uint32_t colour2) {
+// Add each channel, discarding anything over the max. It costs us next to
+// nothing to handle four bytes, so we do. Used for CHANNEL_SUM mixing mode.
+uint32_t HexUnit::sumChannelColours(uint32_t colour1, uint32_t colour2) {
     uint8_t colour1_first_byte  = colour1 & 0xFF;
-    uint8_t colour1_second_byte = colour1 & (0xFF << 8);
-    uint8_t colour1_third_byte  = colour1 & (0xFF << 16);
-    uint8_t colour1_fourth_byte = colour1 & (0xFF << 24);
+    uint8_t colour1_second_byte = colour1 >> 8 & 0xFF;
+    uint8_t colour1_third_byte  = colour1 >> 16 & 0xFF;
+    uint8_t colour1_fourth_byte = colour1 >> 24 & 0xFF;
 
     uint8_t colour2_first_byte  = colour2 & 0xFF;
-    uint8_t colour2_second_byte = colour2 & (0xFF << 8);
-    uint8_t colour2_third_byte  = colour2 & (0xFF << 16);
-    uint8_t colour2_fourth_byte = colour2 & (0xFF << 24);
+    uint8_t colour2_second_byte = colour2 >> 8 & 0xFF;
+    uint8_t colour2_third_byte  = colour2 >> 16 & 0xFF;
+    uint8_t colour2_fourth_byte = colour2 >> 24 & 0xFF;
 
-    uint8_t average_first_byte  = (colour1_first_byte + colour2_first_byte)/2;
-    uint8_t average_second_byte = (colour1_second_byte + colour2_second_byte)/2;
-    uint8_t average_third_byte  = (colour1_third_byte + colour2_third_byte)/2;
-    uint8_t average_fourth_byte = (colour1_fourth_byte + colour2_fourth_byte)/2;
+    uint8_t sum_first_byte  = fmin((colour1_first_byte + colour2_first_byte), MAX_BRIGHTNESS);
+    uint8_t sum_second_byte = fmin((colour1_second_byte + colour2_second_byte), MAX_BRIGHTNESS);
+    uint8_t sum_third_byte  = fmin((colour1_third_byte + colour2_third_byte), MAX_BRIGHTNESS);
+    uint8_t sum_fourth_byte = fmin((colour1_fourth_byte + colour2_fourth_byte), MAX_BRIGHTNESS);
 
-    uint32_t average_colour = average_first_byte | (average_second_byte << 8) | (average_third_byte << 16) | (average_fourth_byte << 24);
+    uint32_t summed_colour = sum_first_byte | (sum_second_byte << 8) | (sum_third_byte << 16) | (sum_fourth_byte << 24);
 
-    return average_colour;
+    return summed_colour;
 }
 
-void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int fill_centre_degrees, int fill_radius) {
+// Mix so that blue is zeroed, and anything over 255 on the red channel spills
+// over to green.  This should result in a transition from red -> orange ->
+// yellow as energy is added. White is ignored/zeroed. Used for FLAME mixing
+// mode.
+uint32_t HexUnit::mixFlameColours(uint32_t colour1, uint32_t colour2) {
+    struct ColourChannels channels1 = neopixels.channelsFromColour(colour1);
+    struct ColourChannels channels2 = neopixels.channelsFromColour(colour2);
+
+    struct ColourChannels combinedChannels = { 0, 0, 0, 0 };
+    int combined_green = channels1.g + channels2.g;
+    if (combined_green > MAX_BRIGHTNESS) {
+        combinedChannels.g = MAX_BRIGHTNESS;
+    }
+    else {
+        combinedChannels.g = combined_green;
+    }
+
+    int combined_red = channels1.r + channels2.r;
+    if (combined_red > MAX_BRIGHTNESS) {
+        combinedChannels.r = MAX_BRIGHTNESS;
+        int remainder = combined_red - MAX_BRIGHTNESS;
+        if ((remainder + combinedChannels.g) > MAX_BRIGHTNESS) {
+            combinedChannels.g = MAX_BRIGHTNESS;
+        }
+        else {
+            combinedChannels.g += remainder;
+        }
+    }
+    else {
+        combinedChannels.r = combined_red;
+    }
+
+    return neopixels.colourFromChannels(combinedChannels);
+}
+
+// Mix in "pastel mode", i.e. anything over MAX_BRIGHTNESS in the primary
+// channel ups the other two channels, so that the net result is "whiter".
+uint32_t HexUnit::mixPastelColours(uint32_t colour1, uint32_t colour2, enum PastelMode pastelMode) {
+    ColourChannels channels1 = neopixels.channelsFromColour(colour1);
+    ColourChannels channels2 = neopixels.channelsFromColour(colour2);
+
+    ColourChannels combined = { 0, 0, 0, 0 };
+
+    int combined_primary = 0;
+    int current_non_primary_channel_level = 0;
+
+    int new_primary_level = 0;
+    int new_nonprimary_channel_level = 0;
+
+    if (pastelMode == RED_IS_PRIMARY) {
+        combined_primary = channels1.r + channels2.r;
+        current_non_primary_channel_level = (channels1.g + channels2.g + channels1.b + channels2.b) / 4;
+    }
+    else if (pastelMode == GREEN_IS_PRIMARY) {
+        combined_primary = channels1.g + channels2.g;
+        current_non_primary_channel_level = (channels1.r + channels2.r + channels1.b + channels2.b) / 4;
+    }
+    else if (pastelMode == BLUE_IS_PRIMARY) {
+        combined_primary = channels1.b + channels2.b;
+        current_non_primary_channel_level = (channels1.r + channels2.r + channels1.g + channels2.g) / 4;
+    }
+
+    if (combined_primary > MAX_BRIGHTNESS) {
+        new_primary_level = MAX_BRIGHTNESS;
+        int remainder = combined_primary - MAX_BRIGHTNESS;
+        new_nonprimary_channel_level = (remainder + current_non_primary_channel_level) > MAX_BRIGHTNESS ? MAX_BRIGHTNESS : (remainder + current_non_primary_channel_level);
+    }
+    else {
+        new_primary_level = combined_primary;
+        new_nonprimary_channel_level = current_non_primary_channel_level;
+    }
+
+    combined.r = pastelMode == RED_IS_PRIMARY ? new_primary_level : new_nonprimary_channel_level;
+    combined.g = pastelMode == GREEN_IS_PRIMARY ? new_primary_level : new_nonprimary_channel_level;
+    combined.b = pastelMode == BLUE_IS_PRIMARY ? new_primary_level : new_nonprimary_channel_level;
+
+    return neopixels.colourFromChannels(combined);
+}
+
+void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int fill_centre_degrees, int fill_radius, enum MixMode mixMode) {
     double fill_centre_radians = fill_centre_degrees * (M_PI / 180);
     for (int index = 0; index < 37; index++) {
         // Calculate the distance between two points described using polar
@@ -185,34 +263,90 @@ void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int 
             - (2 * cell_centre_coords.radius * fill_centre_radius * cos(cell_centre_radians - fill_centre_radians))
         );
 
-        if (round(distance) < fill_radius) {
-            // 
-            // https://greenemath.com/Trigonometry/43/Polar-Equations-Graphs-IILesson.html
-            PolarCoords cell_centre_coords = polar_coordinates[index];
-            double cell_centre_radians = cell_centre_coords.angle * (M_PI / 180);
+        // Here's the formula provided on this page:
+        // https://raw.org/math/calculate-the-intersection-area-of-two-circles/
+        //
+        // d = the distance between the two centres (calculated above).
+        // r1 = the radius of the pixel, i.e. 1.
+        // r2 = the radius of the circle we're drawing i.e. fill_radius.
+        //
+        // Arr = r1 squared, i.e. 1
+        // Brr = r2 squared.
+        //
+        // tA = 2 * acos((Arr + d * d - Brr) / (2 * d * r1))
+        // tB = 2 * acos((Brr + d * d - Arr) / (2 * d * r2))
+        //
+        // Given all that, the area is:
+        // 0.5 * (Arr * (tA - sin (tA)) + Brr * (tB - sin(tB))
+        //
+        // The area of the pixel is 1 * 1 * PI, so we divide the area by PI to
+        // determine how much of the colour should be added to the pixel.
 
-            float distance = sqrt(
-                pow(fill_centre_radius,2) + pow(cell_centre_coords.radius, 2)
-                - (2 * cell_centre_coords.radius * fill_centre_radius * cos(cell_centre_radians - fill_centre_radians))
-            );
+        // This page provides another formula which relies less on order of
+        // operations (parentheses, melon farmer, do you use them?).
+        // https://www.researchgate.net/figure/Area-of-overlapping-between-two-circles-of-different-sizes_fig3_275550769
+        //
+        // d = the distance between the two centres (calculated above).
+        // r1 = the radius of the pixel, i.e. 1.
+        // r2 = the radius of the circle we're drawing i.e. fill_radius.
+        //
+        // Arr = r1 squared, i.e. 1
+        // Brr = r2 squared.
+        //
+        // area = (Arr * acos((d * d) + Arr - Brr / (2 * d * r1)) +
+        //        (Brr * acos(((d * d) + Brr - Arr)/(2 * d * r2)) -
+        //        (0.5 * sqrt((r1 + r2 -d)(d + r1 - r2)(d - r1 + r2)(d + r1 + r2)))
 
-            // uint32_t cell_colour = neopixels.getPixelColor(index);
-            if (floor(distance) < fill_radius) {
-                // TODO: Make mixing optional before we enable this
-                // // Fill at 100%, mixing with whatever's there.
-                // uint32_t mixed_colour = averageColours(cell_colour, fill_colour);
-                // neopixels.setPixelColor(index, mixed_colour);
-                neopixels.setPixelColor(index, fill_colour);
+
+
+        // There's overlap if the distance is less than the sum of the two radii
+        // (and the radii of the pixel is always 0.5).  If the distance is zero,
+        // then there's perfect overlap and the pixel gets 100% of the region's
+        // energy. Otherwise, we use the above formula to calculate how much
+        // energy to contribute to this pixel.
+        // TODO: "eye" animation seems blown out, check old logic.
+        // if (distance < (fill_radius + 0.5)) {
+        if (distance < fill_radius) {
+            int percentage_in_cell;
+            // TODO: Use the full formula above if this isn't sufficiently good-looking.
+            if (distance < (fill_radius / 2)) {
+                percentage_in_cell = 100;
             }
-            // TODO: Make mixing optional.
-            // else {
-            //     // Fill proportionately, mixing with whatever's there.
-            //     int percentage_in_cell = (int)(distance * 100) % 100;
-            //     uint32_t scaled_colour = scaleColourSaturation(fill_colour, percentage_in_cell);
-    
-            //     uint32_t mixed_colour = averageColours(cell_colour, scaled_colour);
-            //     neopixels.setPixelColor(index, mixed_colour);
-            // }
+            else {
+                percentage_in_cell = 75;
+            }
+
+            uint32_t scaled_colour = scaleColourSaturation(fill_colour, percentage_in_cell);
+
+            // No mixing, only fill nearly full hits, and fill them at 100%.
+            if (mixMode == MixMode::NONE) {
+                neopixels.setPixelColor(index, scaled_colour);
+            }
+            else {
+                uint32_t pixel_colour = neopixels.getPixelColor(index);
+                uint32_t mixed_colour;
+
+                switch (mixMode) {
+                    case MixMode::FLAME:
+                        mixed_colour = mixFlameColours(scaled_colour, pixel_colour);
+                        break;
+                    case MixMode::PASTEL_ONE:
+                        mixed_colour = mixPastelColours(scaled_colour, pixel_colour, RED_IS_PRIMARY);
+                        break;
+                    case MixMode::PASTEL_TWO:
+                        mixed_colour = mixPastelColours(scaled_colour, pixel_colour, GREEN_IS_PRIMARY);
+                        break;
+                    case MixMode::PASTEL_THREE:
+                        mixed_colour = mixPastelColours(scaled_colour, pixel_colour, BLUE_IS_PRIMARY);
+                        break;
+                    default:
+                        mixed_colour = scaled_colour;
+                        break;                    
+                }
+
+                neopixels.setPixelColor(index, mixed_colour);
+                // neopixels.setPixelColor(index, neopixels.Color(0, 0, MAX_BRIGHTNESS));
+            }
         }
     }
 }
@@ -459,4 +593,4 @@ void HexUnit::setCubicPixelColor(uint32_t colour, int face, int row, int column)
 }
 
 // I could add row and column filling options depending, but this seems
-// sufficient for a first pass.
+// sufficient for now.

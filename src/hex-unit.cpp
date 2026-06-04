@@ -4,6 +4,7 @@
 #define TOTAL_NEOPIXELS 37
 #define NEOPIXELS_PIN 10
 
+// TODO: Add variables for the number of hex units.
 HexUnit::HexUnit() {
     neopixels = HelpfulNeopixel(TOTAL_NEOPIXELS, NEOPIXELS_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -39,6 +40,8 @@ void HexUnit::clear() {
 void HexUnit::show() {
     neopixels.show();
 }
+
+// TODO: Add optional unit offset to all drawing functions.
 
 // We only support filling everything because anything else should use a
 // layout-specific drawing function. Does not handle any kind of mixing.
@@ -191,7 +194,12 @@ uint32_t HexUnit::mixFlameColours(uint32_t colour1, uint32_t colour2) {
         combinedChannels.r = MAX_BRIGHTNESS;
         int remainder = combined_red - MAX_BRIGHTNESS;
         if ((remainder + combinedChannels.g) > MAX_BRIGHTNESS) {
+            int second_remainder = (remainder + combinedChannels.g) - MAX_BRIGHTNESS;
+
             combinedChannels.g = MAX_BRIGHTNESS;
+
+            // still not sure I like having the white peaks.
+            combinedChannels.b = second_remainder < MAX_BRIGHTNESS ? second_remainder : MAX_BRIGHTNESS;
         }
         else {
             combinedChannels.g += remainder;
@@ -340,7 +348,7 @@ void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int 
                         mixed_colour = mixPastelColours(scaled_colour, pixel_colour, BLUE_IS_PRIMARY);
                         break;
                     default:
-                        mixed_colour = scaled_colour;
+                        mixed_colour = sumChannelColours(scaled_colour, pixel_colour);
                         break;                    
                 }
 

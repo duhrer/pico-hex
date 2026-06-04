@@ -1,3 +1,6 @@
+#ifndef ANIMATION_POLAR_EYE_ROLL_H
+#define ANIMATION_POLAR_EYE_ROLL_H
+
 #include "animation-polar-eye.hpp"
 
 class PolarEyeRollAnimation : public PolarEyeAnimation {
@@ -15,31 +18,31 @@ class PolarEyeRollAnimation : public PolarEyeAnimation {
             radius = 1.75;
         }
 
-        bool animateNextFrame(HexUnit *hexUnit) {
+        bool animateNextFrame() {
             if (this -> frameNumber >= 36) {
                 this->isFinished = true;
             }
             else {
-                // hexUnit -> clear();
+                // current_hex_unit -> clear();
 
-                hexUnit -> fill(hexUnit -> WHITE);
+                current_hex_unit -> fill(current_hex_unit -> WHITE);
 
                 // Start in the centre
                 // TODO: Test it off centre
-                hexUnit -> fillPolarRegion(hexUnit -> BLUE, radius, angle, iris_fill_radius);
+                current_hex_unit -> fillPolarRegion(current_hex_unit -> BLUE, radius, angle, iris_fill_radius);
 
                 // Draw the pupil
-                hexUnit -> fillPolarRegion(hexUnit -> BLACK, radius, angle, pupil_fill_radius);
+                current_hex_unit -> fillPolarRegion(current_hex_unit -> BLACK, radius, angle, pupil_fill_radius);
 
                 // Draw the "gleam"
 
                 // Dead centre
-                hexUnit -> fillPolarRegion(hexUnit -> WHITE, radius, angle, shine_fill_radius);
+                current_hex_unit -> fillPolarRegion(current_hex_unit -> WHITE, radius, angle, shine_fill_radius);
                 
                 // TODO: Move the iris around side to side
                 // TODO: Periodically add a "blink".
 
-                hexUnit -> show();
+                current_hex_unit -> show();
 
                 angle = (angle + angle_delta) % 360;
             }
@@ -48,3 +51,5 @@ class PolarEyeRollAnimation : public PolarEyeAnimation {
         }
 
 };
+
+#endif

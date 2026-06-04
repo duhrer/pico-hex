@@ -1,3 +1,6 @@
+#ifndef ANIMATION_SAWTOOTH_SCROLLING_H
+#define ANIMATION_SAWTOOTH_SCROLLING_H
+
 #include "animation.hpp"
 
 #include "letters.h"
@@ -27,22 +30,22 @@ class SawtoothScrollingTextAnimation : public FrameAnimation {
         }
 
         // Scroll text from left to right.
-        bool animateNextFrame(HexUnit *hexUnit) {
+        bool animateNextFrame() {
             // Display a single letter
-            hexUnit -> clear();
+            current_hex_unit -> clear();
 
             for (int row = 0; row < 7; row++) {
-                hexUnit -> fillSawtoothRow(hexUnit -> row_colours[row], row);
+                current_hex_unit -> fillSawtoothRow(current_hex_unit -> row_colours[row], row);
  
                 for (int column = 0; column < 7; column++) {
                     int offset_column = (column + output_column_offset) % 7;
                     if (offset_column < 6 && (LETTER_S[row][offset_column] != 0)) {
-                        hexUnit -> setSawtoothPixelColour(hexUnit -> BLACK, column, row);
+                        current_hex_unit -> setSawtoothPixelColour(current_hex_unit -> BLACK, column, row);
                     }
                 }
             }
 
-            hexUnit -> show();
+            current_hex_unit -> show();
 
             output_column_offset = (7 + (output_column_offset + 1)) % 7;
 
@@ -52,3 +55,4 @@ class SawtoothScrollingTextAnimation : public FrameAnimation {
         }
 };
 
+#endif

@@ -1,3 +1,6 @@
+#ifndef ANIMATION_POLAR_FLAME_H
+#define ANIMATION_POLAR_FLAME_H
+
 #include "animation.hpp"
 #include <stdlib.h>
 #include <vector>
@@ -19,16 +22,19 @@ class PolarFlameAnimation : public FrameAnimation {
         void addSparks() {
             // Generate new sparks on the outer edge, but use randomness to skew
             // the angle and choose whether to add a spark.
-            int percent_chance_to_add = 60;
+            int percent_chance_to_add = 65;
             for (int a = 0; a < 18; a++) {
                 bool addSpark = ((rand() % 100) <= percent_chance_to_add);
                 if (addSpark && sparksLeft) {
                     int skew = (rand() % 11) - 5;
                     int degrees = (a * 20) + skew;
+
+                    uint8_t energy = MAX_BRIGHTNESS / 4;
+
                     PolarCoords newCoords = {
                         3,
                         degrees,
-                        MAX_BRIGHTNESS / 4
+                        energy
                     };
                     sparks.push_back(newCoords);
 
@@ -41,21 +47,21 @@ class PolarFlameAnimation : public FrameAnimation {
         PolarFlameAnimation()
         : FrameAnimation()
         {
-            this->msDelayBetweenFrames = 100;
+            this->msDelayBetweenFrames = 125;
         }
 
-        bool run (HexUnit *hexUnit) {
+        void start (HexUnit *hexUnit) {
             this -> sparksLeft = STARTING_SPARKS;
             sparks.clear();
             addSparks();
 
-            return FrameAnimation::run(hexUnit);
+            FrameAnimation::start(hexUnit);
         }
 
-        bool animateNextFrame(HexUnit *hexUnit) {
+        bool animateNextFrame() {
             // Move all existing sparks inwards, purge any with a negative radius.
             for (std::vector<PolarCoords>::iterator coords = sparks.begin(); coords != sparks.end(); ++coords) {
-                coords -> radius--;
+                coords -> radius -= 0.125;
                 coords -> angle += (rand() % 11 - 5);
             }
 
@@ -63,7 +69,7 @@ class PolarFlameAnimation : public FrameAnimation {
             sparks.erase(
                 std::remove_if(
                     sparks.begin(), sparks.end(),
-                    [](PolarCoords & coords) { return coords.radius < 0; }
+                    [](PolarCoords & coords) { return coords.radius < 0 || coords.energy == 0; }
                 ),
                 sparks.end()
             );
@@ -72,20 +78,25 @@ class PolarFlameAnimation : public FrameAnimation {
                 addSparks();
             }
 
-            hexUnit -> clear();
+            current_hex_unit -> clear();
             if (sparks.empty()) {
                 this->isFinished = true;
             }
             else {
-                // Render all sparks to the hex unit.
+                // Set the base colour for the whole unit first.
+                uint32_t base_colour = current_hex_unit -> neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS / 4, 0);
+                current_hex_unit -> fill(base_colour);
+            
+                // Mix the extra energy from the sparks into the unit.
                 for (PolarCoords coords : sparks) {
-                    // uint32_t colour = hexUnit -> neopixels.Color(coords.energy, coords.energy / 2, 0);
-                    uint32_t colour = hexUnit -> neopixels.Color(coords.energy, 0, 0);
-                    hexUnit->fillPolarRegion(colour, coords.radius, coords.angle, 1.5, MixMode::FLAME);
+                    uint32_t colour = current_hex_unit -> neopixels.Color(coords.energy, 0, 0);
+                    current_hex_unit -> fillPolarRegion(colour, coords.radius, coords.angle, 1.5, MixMode::FLAME);
                 }
             }
-            hexUnit -> show();
+            current_hex_unit -> show();
 
             return this->isFinished;
         }
 };
+
+#endif

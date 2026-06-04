@@ -1,23 +1,26 @@
+#ifndef ANIMATION_ROLLUP_ALL_H
+#define ANIMATION_ROLLUP_ALL_H
+
 #include "animation.hpp"
 
-#include "animation-ring-cycle.cpp"
-#include "animation-ring-spin.cpp"
-#include "animation-ring-rainbow.cpp"
+#include "animation-ring-cycle.hpp"
+#include "animation-ring-spin.hpp"
+#include "animation-ring-rainbow.hpp"
 
-// #include "animation-italic-scrolling.cpp"
+// #include "animation-italic-scrolling.hpp"
 
-#include "animation-italic-fill-row.cpp"
-#include "animation-italic-sine-rainbow.cpp"
+#include "animation-italic-fill-row.hpp"
+#include "animation-italic-sine-rainbow.hpp"
 
-// #include "animation-sawtooth-scrolling.cpp"
+// #include "animation-sawtooth-scrolling.hpp"
 
-#include "animation-rollup-eye.cpp"
+#include "animation-rollup-eye.hpp"
 
-#include "animation-cubic-cycle.cpp"
+#include "animation-cubic-cycle.hpp"
 
-#include "animation-polar-flame.cpp"
+#include "animation-polar-flame.hpp"
 
-#include "animation-rollup-mixing.cpp"
+#include "animation-rollup-mixing.hpp"
 
 class RollupAllAnimation : public RandomisingRollupAnimation {
     private:
@@ -42,6 +45,8 @@ class RollupAllAnimation : public RandomisingRollupAnimation {
         RollupAllAnimation ()
         : RandomisingRollupAnimation()
         {
+            // TODO: make sure this is switching and repeating as expected.
+
             animations[0] = &ring_cycle_animation;
             animations[1] = &ring_spin_animation;
             animations[2] = &ring_rainbow_animation;
@@ -60,3 +65,5 @@ class RollupAllAnimation : public RandomisingRollupAnimation {
             // animations.push_back(&rollup_eye_animation);
         }
 };
+
+#endif

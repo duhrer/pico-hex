@@ -1,9 +1,12 @@
+#ifndef ANIMATION_ROLLUP_EYE_H
+#define ANIMATION_ROLLUP_EYE_H
+
 #include "animation.hpp"
 
-#include "animation-polar-eye-open.cpp"
-#include "animation-polar-eye-saccade.cpp"
-#include "animation-polar-eye-roll.cpp"
-#include "animation-polar-eye-close.cpp"
+#include "animation-polar-eye-open.hpp"
+#include "animation-polar-eye-saccade.hpp"
+#include "animation-polar-eye-roll.hpp"
+#include "animation-polar-eye-close.hpp"
 
 class RollupEyeAnimation : public RollupAnimation {
     private:
@@ -28,3 +31,5 @@ class RollupEyeAnimation : public RollupAnimation {
         }
 
 };
+
+#endif

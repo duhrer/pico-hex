@@ -8,11 +8,7 @@
 
 #include "hex-unit.hpp"
 
-#include "animations/animation-rollup-all.cpp"
-
-// TODO: Remove
-#include "Adafruit_NeoPixel.hpp"
-
+#include "animations/animation-rollup-all.hpp"
 
 static bool keep_running = true;
 
@@ -63,8 +59,12 @@ int main() {
     hex_unit.begin();
 
     RollupAllAnimation rollup_animation;
+    rollup_animation.start(&hex_unit);
 
     while (keep_running) {
-        rollup_animation.run(&hex_unit);
+        if (rollup_animation.isFinished) {
+            rollup_animation.start(&hex_unit);
+        }
+        sleep_ms(500);
     }
 }

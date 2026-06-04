@@ -1,3 +1,6 @@
+#ifndef ANIMATION_POLAR_EYE_SACCADE
+#define ANIMATION_POLAR_EYE_SACCADE
+
 #include "animation-polar-eye.hpp"
 
 class PolarEyeSaccadeAnimation : public PolarEyeAnimation {
@@ -15,25 +18,25 @@ class PolarEyeSaccadeAnimation : public PolarEyeAnimation {
             radius = 1.75;
         }
 
-        bool animateNextFrame(HexUnit *hexUnit) {
+        bool animateNextFrame() {
             if (this -> frameNumber > 24) {
                 this->isFinished = true;
             }
             else {
-                hexUnit -> clear();
+                current_hex_unit -> clear();
 
-                hexUnit -> fill(hexUnit -> WHITE);
+                current_hex_unit -> fill(current_hex_unit -> WHITE);
 
                 // Start in the centre
-                hexUnit -> fillPolarRegion(hexUnit -> BLUE, radius, angle, iris_fill_radius);
+                current_hex_unit -> fillPolarRegion(current_hex_unit -> BLUE, radius, angle, iris_fill_radius);
 
                 // Draw the pupil
-                hexUnit -> fillPolarRegion(hexUnit -> BLACK, radius, angle, pupil_fill_radius);
+                current_hex_unit -> fillPolarRegion(current_hex_unit -> BLACK, radius, angle, pupil_fill_radius);
 
                 // Draw the "gleam"
-                hexUnit -> fillPolarRegion(hexUnit -> WHITE, radius, angle, shine_fill_radius);
+                current_hex_unit -> fillPolarRegion(current_hex_unit -> WHITE, radius, angle, shine_fill_radius);
                 
-                hexUnit -> show();
+                current_hex_unit -> show();
 
                 // Move the iris around side to side
                 double new_radius = (radius + radius_delta);
@@ -52,3 +55,5 @@ class PolarEyeSaccadeAnimation : public PolarEyeAnimation {
             return this->isFinished;
         }
 };
+
+#endif

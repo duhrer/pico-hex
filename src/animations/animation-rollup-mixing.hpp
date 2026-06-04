@@ -1,6 +1,9 @@
+#ifndef ANIMATION_ROLLUP_MIXING_H
+#define ANIMATION_ROLLUP_MIXING_H
+
 #include "animation.hpp"
 
-#include "animation-polar-mixing.cpp"
+#include "animation-polar-mixing.hpp"
 
 class RollupMixingAnimation : public RollupAnimation {
     private:
@@ -23,3 +26,5 @@ class RollupMixingAnimation : public RollupAnimation {
             animations[5] = &none;
         }
 };
+
+#endif

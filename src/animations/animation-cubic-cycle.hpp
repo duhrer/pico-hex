@@ -1,3 +1,5 @@
+#ifndef ANIMATION_CUBIC_CYCLE_H
+#define ANIMATION_CUBIC_CYCLE_H
 #include "animation.hpp"
 
 class CubicCycleAnimation : public FrameAnimation {
@@ -5,20 +7,20 @@ class CubicCycleAnimation : public FrameAnimation {
         int colour_wheel_offset = 0;
 
     public:
-        bool animateNextFrame(HexUnit *hexUnit) {
+        bool animateNextFrame() {
             // Limit the number of cycles so that we will eventually switch modes.
             if (this -> frameNumber >= 14) {
                 this->isFinished = true;
             }
             else {
-                hexUnit -> clear();
+                current_hex_unit -> clear();
 
                 for (int face = 0; face < 3; face++) {
                     int face_colour_index = (face + colour_wheel_offset) % 7;
-                    hexUnit -> fillCubicFace(hexUnit -> row_colours[face_colour_index], face);
+                    current_hex_unit -> fillCubicFace(current_hex_unit -> row_colours[face_colour_index], face);
                 }
 
-                hexUnit -> show();
+                current_hex_unit -> show();
                 this -> colour_wheel_offset = (this->colour_wheel_offset + 1) % 7;
             }
 
@@ -32,3 +34,4 @@ class CubicCycleAnimation : public FrameAnimation {
             this->msDelayBetweenFrames = 1000;
         }
 };
+#endif

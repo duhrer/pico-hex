@@ -37,7 +37,7 @@ class RollupAllAnimation : public RandomisingRollupAnimation {
 
         CubicCycleAnimation cubic_cycle_animation;
 
-        PolarFlameAnimation polar_flame_animation;
+        RollupPolarFlameAnimation rollup_polar_flame_animation;
 
         RollupMixingAnimation rollup_polar_mixing_animation;
 
@@ -47,15 +47,15 @@ class RollupAllAnimation : public RandomisingRollupAnimation {
         {
             // TODO: make sure this is switching and repeating as expected.
 
-            animations[0] = &ring_cycle_animation;
+            // animations[0] = &ring_cycle_animation;
             animations[1] = &ring_spin_animation;
-            animations[2] = &ring_rainbow_animation;
-            animations[3] = &italic_fill_animation;
-            animations[4] = &italic_sine_animation;
-            animations[5] = &rollup_eye_animation;
-            animations[6] = &cubic_cycle_animation;
-            animations[7] = &polar_flame_animation;
-            animations[8] = &rollup_polar_mixing_animation;
+            // animations[2] = &ring_rainbow_animation;
+            // animations[3] = &italic_fill_animation;
+            // animations[4] = &italic_sine_animation;
+            // animations[5] = &rollup_eye_animation;
+            // animations[6] = &cubic_cycle_animation;
+            animations[7] = &rollup_polar_flame_animation;
+            // animations[8] = &rollup_polar_mixing_animation;
             
             // https://stackoverflow.com/questions/43564387/list-for-abstact-objects
             // animations.push_back(&ring_cycle_animation);

@@ -241,7 +241,8 @@ uint32_t HexUnit::mixPastelColours(uint32_t colour1, uint32_t colour2, enum Past
 
     if (combined_primary > MAX_BRIGHTNESS) {
         new_primary_level = MAX_BRIGHTNESS;
-        int remainder = combined_primary - MAX_BRIGHTNESS;
+        // Divide the overflow between the two channels.
+        int remainder = (combined_primary - MAX_BRIGHTNESS) / 2;
         new_nonprimary_channel_level = (remainder + current_non_primary_channel_level) > MAX_BRIGHTNESS ? MAX_BRIGHTNESS : (remainder + current_non_primary_channel_level);
     }
     else {

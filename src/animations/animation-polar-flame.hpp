@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #define STARTING_SPARKS 1800
+#define MAX_FRAME_NUMBER STARTING_SPARKS/9
 
 struct PolarCoords {
     int radius;
@@ -19,6 +20,8 @@ class PolarFlameAnimation : public FrameAnimation {
         std::vector<PolarCoords> sparks;
         int sparksLeft = STARTING_SPARKS;
 
+        MixMode mix_mode;
+
         void addSparks() {
             // Generate new sparks on the outer edge, but use randomness to skew
             // the angle and choose whether to add a spark.
@@ -29,7 +32,15 @@ class PolarFlameAnimation : public FrameAnimation {
                     int skew = (rand() % 11) - 5;
                     int degrees = (a * 20) + skew;
 
-                    uint8_t energy = MAX_BRIGHTNESS / 4;
+                    uint8_t energy;
+                    switch (mix_mode) {
+                        case MixMode::FLAME:
+                            energy = MAX_BRIGHTNESS / 4;
+                            break;
+                        default:
+                            energy = MAX_BRIGHTNESS / 2;
+                            break;
+                    }
 
                     PolarCoords newCoords = {
                         3,
@@ -44,9 +55,10 @@ class PolarFlameAnimation : public FrameAnimation {
         }
 
     public:
-        PolarFlameAnimation()
+        PolarFlameAnimation(MixMode mixMode = MixMode::FLAME)
         : FrameAnimation()
         {
+            this->mix_mode = mixMode;
             this->msDelayBetweenFrames = 125;
         }
 
@@ -59,44 +71,99 @@ class PolarFlameAnimation : public FrameAnimation {
         }
 
         bool animateNextFrame() {
-            // Move all existing sparks inwards, purge any with a negative radius.
-            for (std::vector<PolarCoords>::iterator coords = sparks.begin(); coords != sparks.end(); ++coords) {
-                coords -> radius -= 0.125;
-                coords -> angle += (rand() % 11 - 5);
-            }
-
-            // Purge sparks that are past the event horizon
-            sparks.erase(
-                std::remove_if(
-                    sparks.begin(), sparks.end(),
-                    [](PolarCoords & coords) { return coords.radius < 0 || coords.energy == 0; }
-                ),
-                sparks.end()
-            );
-
-            if (sparksLeft >= 0) {
-                addSparks();
-            }
-
-            current_hex_unit -> clear();
-            if (sparks.empty()) {
-                this->isFinished = true;
+            // Check the current frame against our hard stop to avoid locking up.
+            // TODO: Remove this if we can figure out why it was originally needed.
+            if (frameNumber > MAX_FRAME_NUMBER) {
+                isFinished = true;
             }
             else {
-                // Set the base colour for the whole unit first.
-                uint32_t base_colour = current_hex_unit -> neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS / 4, 0);
-                current_hex_unit -> fill(base_colour);
-            
-                // Mix the extra energy from the sparks into the unit.
-                for (PolarCoords coords : sparks) {
-                    uint32_t colour = current_hex_unit -> neopixels.Color(coords.energy, 0, 0);
-                    current_hex_unit -> fillPolarRegion(colour, coords.radius, coords.angle, 1.5, MixMode::FLAME);
+                // Move all existing sparks inwards and reduce their energy.
+                for (std::vector<PolarCoords>::iterator coords = sparks.begin(); coords != sparks.end(); ++coords) {
+                    coords -> radius -= 0.25;
+                    coords -> angle += (rand() % 11 - 5);
+                    coords -> energy = (coords -> energy) * 3 / 4; 
                 }
+
+                // Purge sparks that are past the event horizon
+                sparks.erase(
+                    std::remove_if(
+                        sparks.begin(), sparks.end(),
+                        [](PolarCoords & coords) { return coords.radius < 0 || coords.energy == 0; }
+                    ),
+                    sparks.end()
+                );
+
+                if (sparksLeft != 0) {
+                    addSparks();
+                }
+
+                current_hex_unit -> clear();
+                if (sparks.empty()) {
+                    this->isFinished = true;
+                }
+                else {
+                    // Set the base colour for the whole unit first.
+                    uint32_t base_colour;
+                    switch (mix_mode) {
+                        case MixMode::PASTEL_ONE:
+                            base_colour = current_hex_unit -> neopixels.Color(MAX_BRIGHTNESS / 2, 0, 0);
+                            break;
+                        case MixMode::PASTEL_TWO:
+                            base_colour = current_hex_unit -> neopixels.Color(0, MAX_BRIGHTNESS / 2, 0);
+                            break;
+                        case MixMode::PASTEL_THREE:
+                            base_colour = current_hex_unit -> neopixels.Color(0, 0, MAX_BRIGHTNESS / 2);
+                            break;
+                        // Covers FLAME, NONE, and MIX
+                        default:
+                            base_colour = current_hex_unit -> neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS / 4, 0);
+                            break;
+                    }
+                    current_hex_unit -> fill(base_colour);
+                
+                    // Mix the extra energy from the sparks into the unit.
+                    for (PolarCoords coords : sparks) {
+                        uint32_t colour;
+                        switch (mix_mode) {
+                            case MixMode::PASTEL_TWO:
+                                colour = current_hex_unit -> neopixels.Color(0, coords.energy, 0);
+                                break;
+                            case MixMode::PASTEL_THREE:
+                                colour = current_hex_unit -> neopixels.Color(0, 0, coords.energy);
+                                break;
+                            // Covers FLAME, PASTEL_ONE, NONE, and MIX
+                            default:
+                                colour = current_hex_unit -> neopixels.Color(coords.energy, 0, 0);
+                                break;
+                        }
+
+                        current_hex_unit -> fillPolarRegion(colour, coords.radius, coords.angle, 1.5, mix_mode);
+                    }
+                }
+                current_hex_unit -> show();
             }
-            current_hex_unit -> show();
 
             return this->isFinished;
         }
+};
+
+class RollupPolarFlameAnimation : public RollupAnimation {
+    private:
+        PolarFlameAnimation flame_mode_animation = PolarFlameAnimation(MixMode::FLAME);
+        PolarFlameAnimation pastel_mode_one_animation = PolarFlameAnimation(MixMode::PASTEL_ONE);
+        PolarFlameAnimation pastel_mode_two_animation = PolarFlameAnimation(MixMode::PASTEL_TWO);
+        PolarFlameAnimation pastel_mode_three_animation = PolarFlameAnimation(MixMode::PASTEL_THREE);
+
+    public:
+        RollupPolarFlameAnimation()
+        : RollupAnimation()
+        {
+            animations[0] = &flame_mode_animation;
+            animations[1] = &pastel_mode_three_animation;
+            animations[2] = &pastel_mode_one_animation;
+            animations[3] = &pastel_mode_two_animation;
+        }
+
 };
 
 #endif

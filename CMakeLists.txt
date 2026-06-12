@@ -53,7 +53,6 @@ target_link_libraries(${NAME}
     pico_stdlib
     pico_neopixel
     hardware_pio
-    pico_cyw43_arch_none
     pico_time
     pico_rand
     pico_bootsel_via_double_reset

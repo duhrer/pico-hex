@@ -1,13 +1,16 @@
 # Pico Neopixel Hex
 
-This project provides an example of using the [M5stack Hex
-Unit](https://docs.m5stack.com/en/unit/hex) with a Raspberry Pi Pico.
+This project provides an library to control a [M5stack Hex
+Unit](https://docs.m5stack.com/en/unit/hex) with a Raspberry Pi Pico, and
+examples of how it can be used. I use this in my own projects, but it's very
+much not supported and is mainly provided as a reference for you to learn to
+make something better.
 
 ## Prerequisites
 
 ### Hardware
 
-To run this code, you need a few pieces of hardware:
+To use this library, you need a few pieces of hardware:
 
 1. An M5Stack Hex Unit.
 2. M5 Grove Cable(s).
@@ -16,31 +19,49 @@ To run this code, you need a few pieces of hardware:
 
 ### Software
 
-To build/install this project, you will need:
+To build/install a project that uses this library, you will need:
 
 1. Git
 2. CMake
 3. Docker and/or the Pi Pico SDK toolchain
 
-For full details, check out [the template project from which this project was
+For more details, check out [the examples in this repository](./examples/) as
+well as [the template project from which this project was
 created](https://github.com/lichen-community-systems/pi-pico-project-template).
 
-## Build the Binary
+## Using This Library in Your Own Project
 
-The easiest way to build the binary is to run one of the included build scripts.
-If you run `./compile.sh`, binaries should be created in the `build` directory.
-If you run `./docker-compile.sh`, binaries should be created in `build-docker`.
+The suggested way to include this project in your own work is to add it as a
+submodule, as in:
 
-## Install the Binary
+```
+mkdir -p lib
+git submodule add https://github.com/duhrer/pico-hex.git lib/pico_hex
+```
 
-The simplest way to install the binary is to connet your microcontroller to your
-computer and put it in "bootsel" mode.  This can be done by holding the
-"bootsel" buton and either power cycling or hitting the "reset" button.  If
-you've already installed the binary from this repository, you can hit "reset"
-twice in quick succession to enter "bootsel" mode.
+You'll then need to add it to your `CMakeLists.txt` file.  First, you need to
+add the library source to your project as shown here:
 
-Once your microcontroller is in "bootsel" mode, drag the `pico-hex.uf2` binary
-to the USB drive that appears.
+```
+# Bring in the pico_hex library source
+add_subdirectory(lib/pico_hex build)
+```
+
+You then need to add the library to your binary's linked libraries, as in:
+
+```
+target_link_libraries(${NAME}
+    pico_stdlib
+    pico_hex
+    pico_time
+    pico_rand
+    pico_bootsel_via_double_reset
+)
+```
+
+
+With all that done, you need to actually use the code. Check out the [examples
+directory](./examples/) for ideas.
 
 ## License
 

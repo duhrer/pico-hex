@@ -12,8 +12,8 @@ class ItalicSineAnimation : public FrameAnimation {
         const int amplitude = 7;
 
     public:
-        ItalicSineAnimation()
-        : FrameAnimation()
+        ItalicSineAnimation(int unit_number=0)
+        : FrameAnimation(unit_number)
         {
             this->msDelayBetweenFrames = 125;
         }
@@ -23,7 +23,7 @@ class ItalicSineAnimation : public FrameAnimation {
                 this->isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
                 // Offset the row colours using an animated sine pattern.
                 for (int row = 0; row < 7; row++) {
@@ -32,7 +32,7 @@ class ItalicSineAnimation : public FrameAnimation {
                         int offset_row = row + (sin(radians) * amplitude);
 
                         uint32_t colour = (offset_row >= 0 && offset_row <= 6) ? current_hex_unit -> row_colours[offset_row] : current_hex_unit -> BLACK;
-                        current_hex_unit -> setItalicPixelColour(colour, column, row);
+                        current_hex_unit -> setItalicPixelColour(unit_number, colour, column, row);
                     }
                 }
 

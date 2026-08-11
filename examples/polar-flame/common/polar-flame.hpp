@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #define STARTING_SPARKS 1800
-#define MAX_FRAME_NUMBER STARTING_SPARKS/9
+#define FLAME_MAX_FRAME_NUMBER STARTING_SPARKS/9
 
 struct PolarCoords {
     int radius;
@@ -55,8 +55,8 @@ class PolarFlameAnimation : public FrameAnimation {
         }
 
     public:
-        PolarFlameAnimation(MixMode mixMode = MixMode::FLAME)
-        : FrameAnimation()
+        PolarFlameAnimation(MixMode mixMode = MixMode::FLAME, int unit_number=0)
+        : FrameAnimation(unit_number)
         {
             this->mix_mode = mixMode;
             this->msDelayBetweenFrames = 125;
@@ -73,7 +73,7 @@ class PolarFlameAnimation : public FrameAnimation {
         bool animateNextFrame() {
             // Check the current frame against our hard stop to avoid locking up.
             // TODO: Remove this if we can figure out why it was originally needed.
-            if (frameNumber > MAX_FRAME_NUMBER) {
+            if (frameNumber > FLAME_MAX_FRAME_NUMBER) {
                 isFinished = true;
             }
             else {
@@ -97,7 +97,7 @@ class PolarFlameAnimation : public FrameAnimation {
                     addSparks();
                 }
 
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
                 if (sparks.empty()) {
                     this->isFinished = true;
                 }
@@ -119,7 +119,7 @@ class PolarFlameAnimation : public FrameAnimation {
                             base_colour = current_hex_unit -> neopixels.Color(MAX_BRIGHTNESS, MAX_BRIGHTNESS / 4, 0);
                             break;
                     }
-                    current_hex_unit -> fill(base_colour);
+                    current_hex_unit -> fill(unit_number, base_colour);
                 
                     // Mix the extra energy from the sparks into the unit.
                     for (PolarCoords coords : sparks) {
@@ -137,7 +137,7 @@ class PolarFlameAnimation : public FrameAnimation {
                                 break;
                         }
 
-                        current_hex_unit -> fillPolarRegion(colour, coords.radius, coords.angle, 1.5, mix_mode);
+                        current_hex_unit -> fillPolarRegion(unit_number, colour, coords.radius, coords.angle, 1.5, mix_mode);
                     }
                 }
                 current_hex_unit -> show();
@@ -155,8 +155,8 @@ class RollupPolarFlameAnimation : public RollupAnimation {
         PolarFlameAnimation pastel_mode_three_animation = PolarFlameAnimation(MixMode::PASTEL_THREE);
 
     public:
-        RollupPolarFlameAnimation()
-        : RollupAnimation()
+        RollupPolarFlameAnimation(int unit_number=0)
+        : RollupAnimation(unit_number)
         {
             animations[0] = &flame_mode_animation;
             animations[1] = &pastel_mode_three_animation;

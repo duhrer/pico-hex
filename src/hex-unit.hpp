@@ -49,12 +49,14 @@ enum PastelMode {
 class HexUnit {
     private: 
         // Generic functions used with different layout maps
-        uint32_t getRemappedPixelColour(int row, int column, const int *index_map, int index_map_columns);
-        void setRemappedPixelColour(uint32_t colour, int row, int column, const int *index_map, int index_map_columns);
+        uint32_t getRemappedPixelColour(int unit_number, int row, int column, const int *index_map, int index_map_columns);
+        void setRemappedPixelColour(int unit_number, uint32_t colour, int row, int column, const int *index_map, int index_map_columns);
 
         void updateColours();
 
     public:
+        int num_units = 1;
+
         // Wrapped Neopixel object.
         HelpfulNeopixel neopixels;
 
@@ -65,12 +67,13 @@ class HexUnit {
 
         uint8_t brightness = 16;
 
-        HexUnit();
+        HexUnit(int num_units=1);
 
         void begin();
-        void clear();
+        void clear(int unit_number);
         void show();
-        void fill(uint32_t colour);
+
+        void fill(int unit_number, uint32_t colour);
 
         void decreaseBrightness();
         void increaseBrightness();
@@ -81,48 +84,31 @@ class HexUnit {
         uint32_t mixPastelColours(uint32_t colour1, uint32_t colour2, enum PastelMode pastelMode);
 
         // Polar Layout
-        void fillPolarRegion(uint32_t colour, int distanceFromCentre, int degrees, int fillRadius, enum MixMode mixMode=NONE);
+        void fillPolarRegion(int unit_number, uint32_t colour, int distanceFromCentre, int degrees, int fillRadius, enum MixMode mixMode=NONE);
 
         // Ring Layout
-        void setRingPixelColour(uint32_t colour, int ringIndex, int pixelIndex);
-        uint32_t getRingPixelColour(int ringIndex, int pixelIndex);
-        void fillRing(uint32_t colour, int ringIndex);
-        // void drawRingBand(uint32_t colour, int ringIndex, int pixelIndex, int bandWidth) {};
+        void setRingPixelColour(int unit_number, uint32_t colour, int ringIndex, int pixelIndex);
+        uint32_t getRingPixelColour(int unit_number, int ringIndex, int pixelIndex);
+        void fillRing(int unit_number, uint32_t colour, int ringIndex);
+        // void drawRingBand(int unit_number, uint32_t colour, int ringIndex, int pixelIndex, int bandWidth) {};
 
-        // TODO: Figure out if templates could make these functions work for all
-        // cartesian variants.
-
-        // Interlaced Layout
-        // void setInterlacedPixelColour(uint32_t colour, int column, int row) {};
-        // uint32_t getInterlacedPixelColour(int column, int row) {};
-        // TODO: Look up c++ optional parameters for these.
-        // void fillInterlacedRow(uint32_t colour, int row);
-        // void fillInterlacedRow(uint32_t colour, int row, int start_column, int num_cells);
 
         // Sawtooth Layout
-        void setSawtoothPixelColour(uint32_t colour, int column, int row);
-        uint32_t getSawtoothPixelColour(int column, int row);
-        void fillSawtoothRow(uint32_t colour, int row);
-        void fillSawtoothRow(uint32_t colour, int row, int start_column);
-        void fillSawtoothRow(uint32_t colour, int row, int start_column, int num_cells);
+        void setSawtoothPixelColour(int unit_number, uint32_t colour, int column, int row);
+        uint32_t getSawtoothPixelColour(int unit_number, int column, int row);
+        void fillSawtoothRow(int unit_number, uint32_t colour, int row);
+        void fillSawtoothRow(int unit_number, uint32_t colour, int row, int start_column);
+        void fillSawtoothRow(int unit_number, uint32_t colour, int row, int start_column, int num_cells);
 
         // Italic Layout
-        void setItalicPixelColour(uint32_t colour, int column, int row);
-        uint32_t getItalicPixelColour(int column, int row);
-        void fillItalicRow(uint32_t colour, int row);
-        void fillItalicRow(uint32_t colour, int row, int start_column);
-        void fillItalicRow(uint32_t colour, int row, int start_column, int num_cells);
-        // void fillItalicLayoutFromMatrix(uint32_t *matrix);
-        // void fillItalicLayoutFromMatrix(uint32_t *matrix, int matrix_start_column, int matrix_start_row);
+        void setItalicPixelColour(int unit_number, uint32_t colour, int column, int row);
+        uint32_t getItalicPixelColour(int unit_number, int column, int row);
+        void fillItalicRow(int unit_number, uint32_t colour, int row);
+        void fillItalicRow(int unit_number, uint32_t colour, int row, int start_column);
+        void fillItalicRow(int unit_number, uint32_t colour, int row, int start_column, int num_cells);
 
-        void fillCubicFace(uint32_t colour, int face);
-        void setCubicPixelColor(uint32_t colour, int face, int row, int column);
-
-        // Reverse Italic Layout
-        // void setReverseItalicPixelColour(uint32_t colour, int column, int row) {};
-        // uint32_t getReverseItalicPixelColour(int column, int row) {};
-        // void fillReverseItalicRow(uint32_t colour, int row);
-        // void fillReverseItalicRow(uint32_t colour, int row, int start_column, int num_cells);
+        void fillCubicFace(int unit_number, uint32_t colour, int face);
+        void setCubicPixelColor(int unit_number, uint32_t colour, int face, int row, int column);
 };
 
 #endif

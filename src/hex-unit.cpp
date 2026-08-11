@@ -1,12 +1,13 @@
 #include "hex-unit.hpp"
 #include <math.h>
 
-#define TOTAL_NEOPIXELS 37
+#define NEOPIXELS_PER_UNIT 37
 #define NEOPIXELS_PIN 10
 
 // TODO: Add variables for the number of hex units.
-HexUnit::HexUnit() {
-    neopixels = HelpfulNeopixel(TOTAL_NEOPIXELS, NEOPIXELS_PIN, NEO_GRB + NEO_KHZ800);
+HexUnit::HexUnit(int num_units) {
+    this->num_units = num_units;
+    neopixels = HelpfulNeopixel(num_units * NEOPIXELS_PER_UNIT, NEOPIXELS_PIN, NEO_GRB + NEO_KHZ800);
 
     // We have to initialise the colours now because we need the Color method
     // from the neopixel object (for now).
@@ -25,28 +26,35 @@ void HexUnit::updateColours() {
     BLACK = neopixels.Color(0,0,0);
     WHITE = neopixels.Color(brightness, brightness, brightness);
     BLUE = neopixels.Color(0, brightness, brightness);
-
-    clear();
 }
 
 void HexUnit::begin() {
     neopixels.begin();
 }
 
-void HexUnit::clear() {
-    neopixels.clear();
+void HexUnit::clear(int unit_number) {
+    if (this->num_units == 1) {
+        neopixels.clear();
+    }
+    else {
+        fill(unit_number, BLACK);
+    }
 }
 
 void HexUnit::show() {
     neopixels.show();
 }
 
-// TODO: Add optional unit offset to all drawing functions.
-
 // We only support filling everything because anything else should use a
 // layout-specific drawing function. Does not handle any kind of mixing.
-void HexUnit::fill(uint32_t colour) {
-    neopixels.fill(colour);
+void HexUnit::fill(int unit_number, uint32_t colour) {
+    if (num_units == 1) {
+        neopixels.fill(colour);
+    }
+    else {
+        int start_pixel = unit_number * NEOPIXELS_PER_UNIT;
+        neopixels.fill(colour, start_pixel, NEOPIXELS_PER_UNIT);
+    }
 }
 
 void HexUnit::decreaseBrightness() {
@@ -94,7 +102,7 @@ struct PolarCoords {
 
 // Lookup table for polar coordinates for all pixels. Radius is the distance
 // from the midpoint.  Along the three major axes, each unit is 5mm apart, which
-// treat as the diameter of an ideal circle whose midpoint is the same as the
+// we treat as the diameter of an ideal circle whose midpoint is the same as the
 // (square) neopixel.
 
 /*
@@ -115,7 +123,8 @@ struct PolarCoords {
     by 5 to get the value in terms of cell radii, i.e. 2.6, 2.64, and 1.7
 X, 80}, {3.0, 60},
                 {Y, 140}, {2.0, 120}, {Z, 90}, {2.0, 60}, {Y, 40},
-         {X, 160}, {Z, 150}, {1.0, 120}, {1.0, 60}, {Z, 30}, {X, 20},
+         {X, 160}, {Z, 150}, {1.0, 120}, {1.0, 60}, {Z, 30},add_subdirectory(ring-rainbow)
+ {X, 20},
     {3.0, 180}, {2.0, 180}, {1.0, 180}, {0.0, 0}, {1.0, 0}, {2.0, 0}, {3.0, 0},
          {X, 200}, {Z, 210}, {1.0, 240}, {1.0, 300}, {Z, 330.0}, {X, 340},
                 {Y, 220}, {2.0, 240}, {Z, 270}
@@ -160,6 +169,7 @@ uint32_t HexUnit::sumChannelColours(uint32_t colour1, uint32_t colour2) {
     uint8_t colour2_first_byte  = colour2 & 0xFF;
     uint8_t colour2_second_byte = colour2 >> 8 & 0xFF;
     uint8_t colour2_third_byte  = colour2 >> 16 & 0xFF;
+
     uint8_t colour2_fourth_byte = colour2 >> 24 & 0xFF;
 
     uint8_t sum_first_byte  = fmin((colour1_first_byte + colour2_first_byte), MAX_BRIGHTNESS);
@@ -169,7 +179,7 @@ uint32_t HexUnit::sumChannelColours(uint32_t colour1, uint32_t colour2) {
 
     uint32_t summed_colour = sum_first_byte | (sum_second_byte << 8) | (sum_third_byte << 16) | (sum_fourth_byte << 24);
 
-    return summed_colour;
+    return summed_colour;    
 }
 
 // Mix so that blue is zeroed, and anything over 255 on the red channel spills
@@ -257,14 +267,17 @@ uint32_t HexUnit::mixPastelColours(uint32_t colour1, uint32_t colour2, enum Past
     return neopixels.colourFromChannels(combined);
 }
 
-void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int fill_centre_degrees, int fill_radius, enum MixMode mixMode) {
+void HexUnit::fillPolarRegion(int unit_number, uint32_t fill_colour, int fill_centre_radius, int fill_centre_degrees, int fill_radius, enum MixMode mixMode) {
     double fill_centre_radians = fill_centre_degrees * (M_PI / 180);
-    for (int index = 0; index < 37; index++) {
+    int offset = unit_number * NEOPIXELS_PER_UNIT;
+    for (int raw_index = 0; raw_index < NEOPIXELS_PER_UNIT; raw_index++) {
+        int offset_index = raw_index + offset;
+
         // Calculate the distance between two points described using polar
         // coordinates:
         // 
         // https://greenemath.com/Trigonometry/43/Polar-Equations-Graphs-IILesson.html
-        PolarCoords cell_centre_coords = polar_coordinates[index];
+        PolarCoords cell_centre_coords = polar_coordinates[raw_index];
         double cell_centre_radians = cell_centre_coords.angle * (M_PI / 180);
 
         float distance = sqrt(
@@ -289,7 +302,7 @@ void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int 
         // 0.5 * (Arr * (tA - sin (tA)) + Brr * (tB - sin(tB))
         //
         // The area of the pixel is 1 * 1 * PI, so we divide the area by PI to
-        // determine how much of the colour should be added to the pixel.
+        // determine how much of the colour should be added to tadd_subdirectory(ring-rainbow)
 
         // This page provides another formula which relies less on order of
         // operations (parentheses, melon farmer, do you use them?).
@@ -329,10 +342,10 @@ void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int 
 
             // No mixing, only fill nearly full hits, and fill them at 100%.
             if (mixMode == MixMode::NONE) {
-                neopixels.setPixelColor(index, scaled_colour);
+                neopixels.setPixelColor(offset_index, scaled_colour);
             }
             else {
-                uint32_t pixel_colour = neopixels.getPixelColor(index);
+                uint32_t pixel_colour = neopixels.getPixelColor(offset_index);
                 uint32_t mixed_colour;
 
                 switch (mixMode) {
@@ -353,8 +366,7 @@ void HexUnit::fillPolarRegion(uint32_t fill_colour, int fill_centre_radius, int 
                         break;                    
                 }
 
-                neopixels.setPixelColor(index, mixed_colour);
-                // neopixels.setPixelColor(index, neopixels.Color(0, 0, MAX_BRIGHTNESS));
+                neopixels.setPixelColor(offset_index, mixed_colour);
             }
         }
     }
@@ -378,37 +390,39 @@ const int ring_cell_indices[4][18] = {
     {  0,  1,  2,  3,  8, 14, 21, 27, 32, 36, 35, 34, 33, 28, 22, 15,  9,  4 }
 };
 
-void HexUnit::setRemappedPixelColour(uint32_t colour, int row, int column, const int *index_map, int index_map_columns) {
+void HexUnit::setRemappedPixelColour(int unit_number, uint32_t colour, int row, int column, const int *index_map, int index_map_columns) {
     int translated_pixel_index = index_map[(row * index_map_columns) + column];
     if (translated_pixel_index >= 0 && translated_pixel_index < 37 ) {
-        this->neopixels.setPixelColor(translated_pixel_index, colour);
+        int offset = unit_number * NEOPIXELS_PER_UNIT;
+        this->neopixels.setPixelColor(offset + translated_pixel_index, colour);
     }
 }
 
-uint32_t HexUnit::getRemappedPixelColour(int row, int column, const int *index_map, int index_map_columns) {
+uint32_t HexUnit::getRemappedPixelColour(int unit_number, int row, int column, const int *index_map, int index_map_columns) {
     int translated_pixel_index = index_map[(row * index_map_columns) + column];
     if (translated_pixel_index < 0 || translated_pixel_index > 36 ) {
         return 0;
     }
     else {
-        return this->neopixels.getPixelColor(translated_pixel_index);
+        int offset = unit_number * NEOPIXELS_PER_UNIT;
+        return this->neopixels.getPixelColor(offset + translated_pixel_index);
     }
-};
+}
 
-void HexUnit::setRingPixelColour(uint32_t colour, int ringIndex, int pixelIndex) {
-    setRemappedPixelColour(colour, ringIndex, pixelIndex, (int *) ring_cell_indices, 18);
-};
+void HexUnit::setRingPixelColour(int unit_number, uint32_t colour, int ringIndex, int pixelIndex) {
+    setRemappedPixelColour(unit_number, colour, ringIndex, pixelIndex, (int *) ring_cell_indices, 18);
+}
 
-uint32_t HexUnit::getRingPixelColour(int ringIndex, int pixelIndex) {
-    return getRemappedPixelColour(ringIndex, pixelIndex, (int *) ring_cell_indices, 18);
-};
+uint32_t HexUnit::getRingPixelColour(int unit_number, int ringIndex, int pixelIndex) {
+    return getRemappedPixelColour(unit_number, ringIndex, pixelIndex, (int *) ring_cell_indices, 18);
+}
 
-void HexUnit::fillRing(uint32_t colour, int ringIndex) {
+void HexUnit::fillRing(int unit_number, uint32_t colour, int ringIndex) {
     int end_index = ringIndex > 0 ? (ringIndex * 6) : 1;
     for (int pixel_index = 0 ; pixel_index < end_index; pixel_index++) {
-        this->setRingPixelColour(colour, ringIndex, pixel_index);
+        this->setRingPixelColour(unit_number, colour, ringIndex, pixel_index);
     }
-};
+}
 
 // TODO: This needs to support mixing, which means we need colour utility functions.
 // void HexUnit::drawRingBand(uint32_t colour, int ringIndex, int pixelIndex, int bandWidth) {
@@ -445,29 +459,29 @@ const int italic_cell_indices[7][7] = {
     { -1,  -1,  -1,  33,  34,  35,  36}
 };
 
-void HexUnit::setItalicPixelColour(uint32_t colour, int column, int row) {
-    setRemappedPixelColour(colour, row, column, (int *) italic_cell_indices, 7);
+void HexUnit::setItalicPixelColour(int unit_number, uint32_t colour, int column, int row) {
+    setRemappedPixelColour(unit_number, colour, row, column, (int *) italic_cell_indices, 7);
 };
 
-uint32_t HexUnit::getItalicPixelColour(int column, int row) {
-    return getRemappedPixelColour(column, row, (int *) italic_cell_indices, 7);
+uint32_t HexUnit::getItalicPixelColour(int unit_number, int column, int row) {
+    return getRemappedPixelColour(unit_number, column, row, (int *) italic_cell_indices, 7);
 };
 
-void HexUnit::fillItalicRow(uint32_t colour, int row) {
+void HexUnit::fillItalicRow(int unit_number, uint32_t colour, int row) {
     for (int column = 0; column < 7; column++) {
-        setItalicPixelColour(colour, column, row);
+        setItalicPixelColour(unit_number, colour, column, row);
     }
 };
 
-void HexUnit::fillItalicRow(uint32_t colour, int row, int start_column, int num_cells) {
+void HexUnit::fillItalicRow(int unit_number, uint32_t colour, int row, int start_column, int num_cells) {
     for (int column = start_column; column < start_column + num_cells; column++) {
-        setItalicPixelColour(colour, column, row);
+        setItalicPixelColour(unit_number, colour, column, row);
     }
 };
 
-void HexUnit::fillItalicRow(uint32_t colour, int row, int start_column) {
+void HexUnit::fillItalicRow(int unit_number, uint32_t colour, int row, int start_column) {
     for (int column = start_column; column < 7; column++) {
-        setItalicPixelColour(colour, column, row);
+        setItalicPixelColour(unit_number, colour, column, row);
     }
 };
 
@@ -494,29 +508,29 @@ const int sawtooth_cell_indices[7][7] = {
     { -1,  -1,  33,  34,  35,  36,  -1}
 };
 
-void HexUnit::setSawtoothPixelColour(uint32_t colour, int column, int row) {
-    setRemappedPixelColour(colour, row, column, (int *) sawtooth_cell_indices, 7);
+void HexUnit::setSawtoothPixelColour(int unit_number, uint32_t colour, int column, int row) {
+    setRemappedPixelColour(unit_number, colour, row, column, (int *) sawtooth_cell_indices, 7);
 };
 
-uint32_t HexUnit::getSawtoothPixelColour(int column, int row) {
-    return getRemappedPixelColour(row, column, (int *) sawtooth_cell_indices, 7);
+uint32_t HexUnit::getSawtoothPixelColour(int unit_number, int column, int row) {
+    return getRemappedPixelColour(unit_number, row, column, (int *) sawtooth_cell_indices, 7);
 };
 
-void HexUnit::fillSawtoothRow(uint32_t colour, int row) {
+void HexUnit::fillSawtoothRow(int unit_number, uint32_t colour, int row) {
     for (int column = 0; column < 7; column++) {
-        setSawtoothPixelColour(colour, column, row);
+        setSawtoothPixelColour(unit_number, colour, column, row);
     }
 };
 
-void HexUnit::fillSawtoothRow(uint32_t colour, int row, int start_column) {
+void HexUnit::fillSawtoothRow(int unit_number, uint32_t colour, int row, int start_column) {
     for (int column = start_column; column < 7; column++) {
-        setSawtoothPixelColour(colour, column, row);
+        setSawtoothPixelColour(unit_number, colour, column, row);
     }
 };
 
-void HexUnit::fillSawtoothRow(uint32_t colour, int row, int start_column, int num_cells) {
+void HexUnit::fillSawtoothRow(int unit_number, uint32_t colour, int row, int start_column, int num_cells) {
     for (int column = start_column; column < start_column + num_cells; column++) {
-        setSawtoothPixelColour(colour, column, row);
+        setSawtoothPixelColour(unit_number, colour, column, row);
     }
 };
 
@@ -584,20 +598,22 @@ const int cubic_cell_indices[4][10] = {
     {3, 7, 12, 15, 16, 17, 18, 25, 31, 36}
 };
 
-void HexUnit::fillCubicFace(uint32_t colour, int face) {
+void HexUnit::fillCubicFace(int unit_number, uint32_t colour, int face) {
     for (int face_cell_index = 0; face_cell_index < 10; face_cell_index++) {
         int real_cell_index = cubic_cell_indices[face][face_cell_index];
         if (real_cell_index != -1) {
-            neopixels.setPixelColor(real_cell_index, colour);
+            int offset = unit_number * NEOPIXELS_PER_UNIT;
+            neopixels.setPixelColor(offset + real_cell_index, colour);
         }
     }
 }
 
-void HexUnit::setCubicPixelColor(uint32_t colour, int face, int row, int column) {
+void HexUnit::setCubicPixelColor(int unit_number, uint32_t colour, int face, int row, int column) {
     int cell_index = cubic_cell_indices[face][(row * 3) + column];
 
     if (cell_index != -1) {
-        neopixels.setPixelColor(cell_index, colour);
+        int offset = unit_number * NEOPIXELS_PER_UNIT;
+        neopixels.setPixelColor(offset + cell_index, colour);
     }
 }
 

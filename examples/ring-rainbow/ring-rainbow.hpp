@@ -14,12 +14,12 @@ class RingRainbowAnimation : public FrameAnimation {
                 this->isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
                 for (int index = 0; index < 4; index++) {
                     int colour_index = (index + colour_wheel_offset) % 7;
                     uint32_t colour = current_hex_unit -> row_colours[colour_index];
-                    current_hex_unit -> fillRing(colour, index);
+                    current_hex_unit -> fillRing(unit_number, colour, index);
                 }
 
                 current_hex_unit -> show();
@@ -30,8 +30,8 @@ class RingRainbowAnimation : public FrameAnimation {
             return this->isFinished;
         } 
 
-        RingRainbowAnimation()
-        : FrameAnimation()
+        RingRainbowAnimation(int unit_number=0)
+        : FrameAnimation(unit_number)
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 250;

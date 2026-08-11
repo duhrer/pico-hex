@@ -43,10 +43,12 @@ add_subdirectory(italic-fill-row)
 add_subdirectory(italic-sine-rainbow)
 add_subdirectory(polar-flame)
 add_subdirectory(polar-mixing)
-add_subdirectory(ring-cycle)
 add_subdirectory(ring-rainbow)
 add_subdirectory(ring-spin)
 add_subdirectory(rollup-eye)
 add_subdirectory(rollup-all)
+add_subdirectory(rollup-all-random)
+
+add_subdirectory(multi-unit)
 
 

@@ -23,18 +23,18 @@ class PolarEyeSaccadeAnimation : public PolarEyeAnimation {
                 this->isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
-                current_hex_unit -> fill(current_hex_unit -> WHITE);
+                current_hex_unit -> fill(unit_number, current_hex_unit -> WHITE);
 
                 // Start in the centre
-                current_hex_unit -> fillPolarRegion(current_hex_unit -> BLUE, radius, angle, iris_fill_radius);
+                current_hex_unit -> fillPolarRegion(unit_number, current_hex_unit -> BLUE, radius, angle, iris_fill_radius);
 
                 // Draw the pupil
-                current_hex_unit -> fillPolarRegion(current_hex_unit -> BLACK, radius, angle, pupil_fill_radius);
+                current_hex_unit -> fillPolarRegion(unit_number, current_hex_unit -> BLACK, radius, angle, pupil_fill_radius);
 
                 // Draw the "gleam"
-                current_hex_unit -> fillPolarRegion(current_hex_unit -> WHITE, radius, angle, shine_fill_radius);
+                current_hex_unit -> fillPolarRegion(unit_number, current_hex_unit -> WHITE, radius, angle, shine_fill_radius);
                 
                 current_hex_unit -> show();
 

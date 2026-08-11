@@ -16,10 +16,15 @@ class RollupEyeAnimation : public RollupAnimation {
         PolarEyeCloseAnimation polar_eye_close_animation;
 
     public:
-        RollupEyeAnimation()
-        :RollupAnimation()
+        RollupEyeAnimation(int unit_number=0)
+        :RollupAnimation(unit_number)
         {
-            animations[0] =&polar_eye_open_animation;
+            polar_eye_open_animation.unit_number = unit_number;
+            polar_eye_saccade_animation.unit_number = unit_number;
+            polar_eye_roll_animation.unit_number = unit_number;
+            polar_eye_close_animation.unit_number = unit_number;
+
+            animations[0] = &polar_eye_open_animation;
             animations[1] = &polar_eye_saccade_animation;
             animations[2] = &polar_eye_roll_animation;
             animations[3] = &polar_eye_close_animation;

@@ -20,7 +20,7 @@ class RingSpinAnimation : public FrameAnimation {
                 isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
                 int brightness_percentage = ((current_hex_unit -> brightness) * 100) / MAX_BRIGHTNESS;
 
@@ -30,7 +30,7 @@ class RingSpinAnimation : public FrameAnimation {
 
                 uint32_t colour = current_hex_unit -> neopixels.Color((r * brightness_percentage) / 100, (g * brightness_percentage) / 100, (b * brightness_percentage) / 100);
 
-                current_hex_unit -> setRingPixelColour(colour, 0, 0);
+                current_hex_unit -> setRingPixelColour(unit_number, colour, 0, 0);
 
                 for (int ring_index = 1; ring_index < 4; ring_index++) {
                     int num_cells = ring_index * 6;
@@ -40,9 +40,9 @@ class RingSpinAnimation : public FrameAnimation {
                     int second_cell_index = (cell_index + (num_cells / 3)) % num_cells;
                     int third_cell_index = (cell_index + (2 * num_cells / 3)) % num_cells;
 
-                    current_hex_unit -> setRingPixelColour(colour, ring_index, cell_index);
-                    current_hex_unit -> setRingPixelColour(colour, ring_index, second_cell_index);
-                    current_hex_unit -> setRingPixelColour(colour, ring_index, third_cell_index);
+                    current_hex_unit -> setRingPixelColour(unit_number, colour, ring_index, cell_index);
+                    current_hex_unit -> setRingPixelColour(unit_number, colour, ring_index, second_cell_index);
+                    current_hex_unit -> setRingPixelColour(unit_number, colour, ring_index, third_cell_index);
                 }
 
                 current_hex_unit -> show();
@@ -51,8 +51,8 @@ class RingSpinAnimation : public FrameAnimation {
             return isFinished;
         } 
 
-        RingSpinAnimation()
-        : FrameAnimation()
+        RingSpinAnimation(int unit_number=0)
+        : FrameAnimation(unit_number)
         {
             // I'm using this pattern until I learn a better one.
             msDelayBetweenFrames = 100;

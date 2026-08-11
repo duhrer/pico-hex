@@ -12,8 +12,8 @@ class ItalicFillAnimation : public FrameAnimation {
     public:
         // ItalicFillAnimation(HexUnit hexUnit)
         // : Animation(hexUnit)
-        ItalicFillAnimation()
-        : FrameAnimation()
+        ItalicFillAnimation(int unit_number=0)
+        : FrameAnimation(unit_number)
         {
             this->msDelayBetweenFrames = 100;
         }
@@ -24,7 +24,7 @@ class ItalicFillAnimation : public FrameAnimation {
                 this->isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
                 for (int row = 0; row < 7; row++) {
                     uint32_t main_colour = current_hex_unit -> row_colours[row];
@@ -32,15 +32,15 @@ class ItalicFillAnimation : public FrameAnimation {
 
                     if (dividing_column > 0) {
                         // Fill the whole row with the primary colour.
-                        current_hex_unit -> fillItalicRow(main_colour, row);
+                        current_hex_unit -> fillItalicRow(unit_number, main_colour, row);
                     }
 
                     // Overwrite half the row with a secondary colour.
-                    current_hex_unit -> fillItalicRow(alternate_colour, row, dividing_column);
+                    current_hex_unit -> fillItalicRow(unit_number, alternate_colour, row, dividing_column);
 
                     // Draw a clear dividing line between the two areas
                     if (dividing_column > 0 && dividing_column < 6) {
-                        current_hex_unit -> setItalicPixelColour(current_hex_unit -> BLACK, dividing_column, row);
+                        current_hex_unit -> setItalicPixelColour(unit_number, current_hex_unit -> BLACK, dividing_column, row);
                     }
                 }
 

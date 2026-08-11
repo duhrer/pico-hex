@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MAX_FRAME_NUMBER 120
+#define MIXING_MAX_FRAME_NUMBER 120
 #define MAX_RADIUS 2
 
 class PolarMixingAnimation : public FrameAnimation {
@@ -22,19 +22,19 @@ class PolarMixingAnimation : public FrameAnimation {
     public:
         PolarMixingAnimation() = default;
 
-        PolarMixingAnimation(MixMode mixMode)
-        :FrameAnimation()
+        PolarMixingAnimation(MixMode mixMode, int unit_number=0)
+        :FrameAnimation(unit_number)
         {
             this->mixMode = mixMode;
             msDelayBetweenFrames = 250;
         }
 
         bool animateNextFrame() {
-            if (frameNumber > MAX_FRAME_NUMBER) {
+            if (frameNumber > MIXING_MAX_FRAME_NUMBER) {
                 isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
                 uint32_t colour1;
                 uint32_t colour2;
@@ -71,9 +71,9 @@ class PolarMixingAnimation : public FrameAnimation {
                 double radians = ((2.0 * M_PI) / radius_wavelength) * frameNumber;
                 double radius = radius_median + (sin(radians) * radius_amplitude);
 
-                current_hex_unit -> fillPolarRegion(colour1, radius, starting_angle, fill_radius, mixMode);
-                current_hex_unit -> fillPolarRegion(colour2, radius, (starting_angle + 120) % 360, fill_radius, mixMode);
-                current_hex_unit -> fillPolarRegion(colour3, radius, (starting_angle + 240) % 360, fill_radius, mixMode);
+                current_hex_unit -> fillPolarRegion(unit_number, colour1, radius, starting_angle, fill_radius, mixMode);
+                current_hex_unit -> fillPolarRegion(unit_number, colour2, radius, (starting_angle + 120) % 360, fill_radius, mixMode);
+                current_hex_unit -> fillPolarRegion(unit_number, colour3, radius, (starting_angle + 240) % 360, fill_radius, mixMode);
 
                 current_hex_unit -> show();
 
@@ -94,9 +94,16 @@ class RollupPolarMixingAnimation : public RollupAnimation {
             PolarMixingAnimation pastel3 = PolarMixingAnimation(MixMode::PASTEL_THREE);
 
     public:
-        RollupPolarMixingAnimation()
-        : RollupAnimation()
+        RollupPolarMixingAnimation(int unit_number=0)
+        : RollupAnimation(unit_number)
         {
+            none.unit_number = unit_number;
+            sum.unit_number = unit_number;
+            flame.unit_number = unit_number;
+            pastel1.unit_number = unit_number;
+            pastel2.unit_number = unit_number;
+            pastel3.unit_number = unit_number;
+
             animations[0] = &sum;
             animations[1] = &flame;
             animations[2] = &pastel1;

@@ -13,11 +13,11 @@ class CubicCycleAnimation : public FrameAnimation {
                 this->isFinished = true;
             }
             else {
-                current_hex_unit -> clear();
+                current_hex_unit -> clear(unit_number);
 
                 for (int face = 0; face < 3; face++) {
                     int face_colour_index = (face + colour_wheel_offset) % 7;
-                    current_hex_unit -> fillCubicFace(current_hex_unit -> row_colours[face_colour_index], face);
+                    current_hex_unit -> fillCubicFace(unit_number, current_hex_unit -> row_colours[face_colour_index], face);
                 }
 
                 current_hex_unit -> show();
@@ -27,8 +27,8 @@ class CubicCycleAnimation : public FrameAnimation {
             return this->isFinished;
         } 
 
-        CubicCycleAnimation()
-        : FrameAnimation()
+        CubicCycleAnimation(int unit_number=0)
+        : FrameAnimation(unit_number)
         {
             // I'm using this pattern until I learn a better one.
             this->msDelayBetweenFrames = 1000;

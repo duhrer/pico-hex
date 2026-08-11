@@ -9,11 +9,15 @@ class Animation {
    protected:
       struct repeating_timer timer;
    public:
+      int unit_number;
+
       bool isFinished = false;
       HexUnit *current_hex_unit;
  
       // Need a default constructor and destructor to avoid "undefined reference to vtable" linker errors.
-      Animation() {};
+      Animation(int unit_number) {
+         this->unit_number = unit_number;
+      };
       ~Animation() {};
 
       // These needed to be defined as empty functions to avoid the same linker errors.
@@ -36,8 +40,8 @@ class FrameAnimation : public Animation {
          cancel_repeating_timer(&timer);
       }
 
-      FrameAnimation() 
-      : Animation() {
+      FrameAnimation(int unit_number=0) 
+      : Animation(unit_number) {
       }
 
       ~FrameAnimation() {
@@ -82,12 +86,23 @@ class RollupAnimation : public Animation {
          cancel_repeating_timer(&timer);
       }
 
+      RollupAnimation(int unit_number)
+      :Animation(unit_number)
+      {         
+      }
+
       ~RollupAnimation() {
          stop();
       }
 
       void pick_next() {
-         current_animation = NULL;
+         if (current_animation) {
+            // This is a little bit of belt and braces, but make sure the current
+            // animation isn't running.
+            current_animation->stop();
+            current_animation = NULL;
+         }
+
          while (animation_index < 16 && !(current_animation)) {
             Animation *animation = animations[animation_index];
             if (animation) {
@@ -100,7 +115,7 @@ class RollupAnimation : public Animation {
 
          if (animation_index == 16) {
             isFinished = true;
-            // stop();
+            stop();
          }
       }
 };
@@ -154,6 +169,10 @@ class RandomisingRollupAnimation : public RollupAnimation {
       int animations_run = 0;
 
    public:
+      RandomisingRollupAnimation(int unit_number=0)
+      : RollupAnimation(unit_number) {
+      }
+
       void start (HexUnit *hexUnit);
 
       void pick_next() {
@@ -183,7 +202,7 @@ class RandomisingRollupAnimation : public RollupAnimation {
          // ran off the end. Otherwise the main scheduler callback will handle things.
          if (animations_run == 16) {
             isFinished = true;
-            // stop();
+            stop();
          }
       }
 };
@@ -264,7 +283,7 @@ bool check_loop(struct repeating_timer *rt) {
    // loops have run.
    if (loop_animation -> animation_cycles_left == 0) {
       loop_animation -> isFinished = true;
-      // loop_animation -> stop();
+      loop_animation -> stop();
    }
 
    return !(loop_animation -> isFinished);

@@ -1,16 +1,13 @@
-#include <math.h>
-#include <string.h>
 #include <stdio.h>
 
-#include "pico/stdlib.h"
-
 #include "hex-unit.hpp"
-
 #include "rollup-eye.hpp"
 
 static bool keep_running = true;
 
 static HexUnit hex_unit = HexUnit();
+
+// TODO: This does not survive a reset.
 
 int main() {
     stdio_init_all();

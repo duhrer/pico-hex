@@ -4,8 +4,8 @@ This directory contains examples that demonstrate each of the available drawing
 methods, and which also demonstrate the animation classes provided by this
 library.
 
-|| Subdirectory         || Description                       ||
-|| -------------------- || --------------------------------- ||
+| Subdirectory          | Description                       |
+| --------------------- | --------------------------------- |
 | `cubic-cycle`         | Break the hex down into cubic tiles drawn in perspective. |
 | `italic-fill-row`     | Demonstrate using the hex array as a slanted grid by drawing straight rainbow lines. |
 | `italic-sine-rainbow` | Draw a rainbow sine wave using the "italic" (slanted grid) methods. |

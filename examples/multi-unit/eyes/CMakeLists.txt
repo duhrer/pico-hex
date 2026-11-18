@@ -19,6 +19,7 @@ target_link_libraries(${NAME}
     pico_hex
     pico_time
     pico_rand
+    pico_multicore
     pico_bootsel_via_double_reset
 )
 

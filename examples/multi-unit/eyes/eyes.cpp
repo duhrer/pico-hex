@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "pico/stdlib.h"
+#include "pico/multicore.h"
 
 #include "hex-unit.hpp"
 
@@ -15,6 +16,8 @@ static HexUnit hex_unit = HexUnit(2);
 // TODO: This does not survive a reset. Figure out why.
 
 int main() {
+    multicore_reset_core1();
+
     stdio_init_all();
     
     // Initial pause to help us know that the unit has been reset.
